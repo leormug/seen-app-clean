@@ -1,0 +1,18 @@
+// config-overrides.js
+const { override } = require("customize-cra");
+
+module.exports = override((config) => {
+  // Ensure webpack 5 resolves Node core 'vm' for browser
+  config.resolve = config.resolve || {};
+  config.resolve.fallback = {
+    ...(config.resolve.fallback || {}),
+    vm: require.resolve("vm-browserify"),
+  };
+
+  // Optional: quiet down source map warnings in prod
+  if (config.devtool && process.env.GENERATE_SOURCEMAP === "false") {
+    config.devtool = false;
+  }
+
+  return config;
+});

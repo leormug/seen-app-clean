@@ -1,0 +1,109 @@
+/* src/index.css */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto,
+    sans-serif;
+  background: #f5f6f8;
+  color: #111;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Classes already used in CardLayoutView/App */
+.screen-only {
+  display: block;
+}
+
+.no-print {
+  /* Only hidden in print */
+}
+
+.print-summary-root {
+  display: none;
+}
+
+/* ==== SCREEN VS PRINT ==== */
+/* default: normal screen */
+.screen-only {
+  display: block;
+}
+
+.print-only {
+  display: none;
+}
+
+.no-print {
+  display: block;
+}
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    margin: 1.25in 1in 1.25in 1in;
+  }
+
+  /* Do NOT force new pages. Just keep each section together. */
+  .print-section {
+    page-break-inside: avoid;
+    break-inside: avoid-page;
+  }
+}
+/* base */
+.app-screen-root {
+  display: block;
+}
+
+.app-print-root {
+  display: none;
+}
+
+@media print {
+  .app-screen-root {
+    display: none !important;
+  }
+
+  .app-print-root {
+    display: block !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    margin: 1.25in 1in 1.25in 1in;
+  }
+
+  /* keep each section on one page, but do NOT force page breaks */
+  .print-section {
+    page-break-inside: avoid;
+    break-inside: avoid-page;
+  }
+}

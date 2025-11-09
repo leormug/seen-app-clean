@@ -1,0 +1,75 @@
+name: Windows Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "electron/**"
+      - "public/**"
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      NODE_VERSION: 18
+      NODE_OPTIONS: --max_old_space_size=4096
+      CI: false                # avoid CRA treating warnings as fatal
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Print env
+        run: |
+          node -v
+          npm -v
+          git rev-parse --short HEAD
+
+      - name: Install deps (tolerant)
+        run: |
+          npm config set fund false audit false
+          npm ci || npm install --legacy-peer-deps
+
+      - name: Verify webpack fallbacks present
+        run: |
+          node -e "const p=require('./package.json');console.log(!!(p.webpack && p.webpack.resolve && p.webpack.resolve.fallback));"
+
+      - name: Build React app (verbose)
+        run: npm run build --loglevel=verbose
+
+      - name: Pack Windows app (debug logs)
+        run: npx electron-builder --win nsis zip --publish=never --config.npmRebuild=false
+
+        env:
+          DEBUG: electron-builder
+
+      - name: Upload artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SEEN-windows
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/*-unpacked/**
+
+      - name: Upload logs on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            C:\npm\cache\_logs\**\*.log
