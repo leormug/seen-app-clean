@@ -15,6 +15,7 @@ function nonEmptyRows(arr, keys) {
 export default function PrintSummary({ patientPermanent, visitData }) {
   const P = patientPermanent || {};
   const V = visitData || {};
+ 
 
   const diagnoses = nonEmptyRows(P.diagnoses, ["name", "by", "date", "status"]);
   const hospitalizations = nonEmptyRows(P.hospitalizations, ["why", "when"]);
@@ -96,7 +97,7 @@ export default function PrintSummary({ patientPermanent, visitData }) {
         </section>
       )}
 
-      {/* DIAGNOSES */}
+                     {/* DIAGNOSES */}
       {diagnoses.length > 0 && (
         <section className="print-section" style={{ marginBottom: "10pt" }}>
           <h2 style={{ fontSize: "13pt", margin: "0 0 4pt 0" }}>
@@ -105,19 +106,26 @@ export default function PrintSummary({ patientPermanent, visitData }) {
           <ul style={{ margin: 0, paddingLeft: "1.1em" }}>
             {diagnoses.map((d, idx) => (
               <li key={idx} style={{ marginBottom: "2pt" }}>
-                {isNonEmptyString(d.name) && <strong>{d.name}</strong>}{" "}
-                {isNonEmptyString(d.by) && <span>by {d.by}</span>}
+                {isNonEmptyString(d.name) && <strong>{d.name}</strong>}
+                {isNonEmptyString(d.by) && (
+                  <span>{isNonEmptyString(d.name) ? " by " : "By "}{d.by}</span>
+                )}
                 {isNonEmptyString(d.date) && (
-                  <span>{d.by || d.name ? " – " : ""}{d.date}</span>
+                  <span>
+                    {isNonEmptyString(d.name) || isNonEmptyString(d.by) ? " (" : ""}
+                    {d.date}
+                    {isNonEmptyString(d.name) || isNonEmptyString(d.by) ? ")" : ""}
+                  </span>
                 )}
                 {isNonEmptyString(d.status) && (
-                  <span> ({d.status})</span>
+                  <span> – {d.status}</span>
                 )}
               </li>
             ))}
           </ul>
         </section>
       )}
+
 
       {/* HOSPITALIZATIONS */}
       {hospitalizations.length > 0 && (

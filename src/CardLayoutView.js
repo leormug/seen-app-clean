@@ -316,6 +316,9 @@ export default function CardLayoutView({
 }) {
   const [localVisit, setLocalVisit] = useState(visitData || {});
   const hasParent = typeof mergeVisitData === "function";
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (hasParent) setLocalVisit(visitData || {});
@@ -358,6 +361,19 @@ export default function CardLayoutView({
   const V_live = hasParent ? { ...(visitData || {}) } : { ...(localVisit || {}) };
   const P_default = patientDefaults || {};
   const V_default = visitDefaults || {};
+    // -------- Diagnoses helpers ----------
+  const diagnosesLive = Array.isArray(P_live.diagnoses)
+    ? P_live.diagnoses
+    : [];
+
+  const hasRealDiagnosis = diagnosesLive.some((d) => {
+    const name = (d?.name || "").trim();
+    const by = (d?.by || "").trim();
+    const date = (d?.date || "").trim();
+    // real only if at least one text field is non-empty
+    return !!(name || by || date);
+  });
+
 
   const textareasRef = useRef([]);
   function autoResize(e) {
@@ -543,7 +559,8 @@ export default function CardLayoutView({
       window.removeEventListener("resize", onScrollResize);
     };
   }, [bottomVisible]);
-      function handleClearForm() {
+
+  function handleClearForm() {
     const ok = window.confirm(
       "This will permanently clear all information in this visit. Continue?"
     );
@@ -558,15 +575,9 @@ export default function CardLayoutView({
       functionalImpact: "",
 
       // arrays: 1 empty row each, so placeholders show but no real data
-      diagnoses: [
-        { name: "", by: "", date: "", status: "suspected" },
-      ],
-      hospitalizations: [
-        { why: "", when: "" },
-      ],
-      procedures: [
-        { name: "", date: "", notes: "" },
-      ],
+      diagnoses: [{ name: "", by: "", date: "", status: "" }],
+      hospitalizations: [{ why: "", when: "" }],
+      procedures: [{ name: "", date: "", notes: "" }],
       treatments: [
         {
           name: "",
@@ -575,15 +586,9 @@ export default function CardLayoutView({
           sideEffects: "",
         },
       ],
-      testsImaging: [
-        { test: "", finding: "", date: "" },
-      ],
-      doctors: [
-        { name: "", specialty: "", contact: "" },
-      ],
-      allergies: [
-        { item: "", reaction: "" },
-      ],
+      testsImaging: [{ test: "", finding: "", date: "" }],
+      doctors: [{ name: "", specialty: "", contact: "" }],
+      allergies: [{ item: "", reaction: "" }],
     };
 
     if (typeof setPatientPermanent === "function") {
@@ -616,7 +621,6 @@ export default function CardLayoutView({
       } catch {}
     }
   }
-
 
   return (
     <div
@@ -706,111 +710,120 @@ export default function CardLayoutView({
         </section>
       </div>
 
-      {/* Diagnoses */}
-      <div ref={sectionRefs.current.diagnoses} data-section-id="diagnoses">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
-          </header>
-          {(Array.isArray(P_live.diagnoses) ? P_live.diagnoses : []).map(
-            (d, idx) => {
-              const dDefaults = (P_default.diagnoses || [])[idx] || {};
-              const statusVal = isNonEmptyString(d?.status)
-                ? d.status
-                : dDefaults.status || "suspected";
-              return (
-                <div key={idx} style={itemBoxStyle}>
-                  <RowHeader>
-                    <span>Diagnosis {idx + 1}</span>
-                    <DeleteButton
-                      onClick={() =>
-                        removePRow("diagnoses", idx, {
-                          name: "",
-                          by: "",
-                          date: "",
-                          status: "suspected",
-                        })
-                      }
-                    />
-                  </RowHeader>
-                  <InputDemo
-                    label="Name"
-                    liveVal={d?.name || ""}
-                    demoVal={dDefaults.name}
-                    onChange={(val) =>
-                      updatePArray("diagnoses", idx, "name", val)
-                    }
-                  />
-                  <InputDemo
-                    label="By (Clinician)"
-                    liveVal={d?.by || ""}
-                    demoVal={dDefaults.by}
-                    onChange={(val) =>
-                      updatePArray("diagnoses", idx, "by", val)
-                    }
-                  />
-                  <InputDemo
-                    label="Date"
-                    liveVal={d?.date || ""}
-                    demoVal={dDefaults.date}
-                    onChange={(val) =>
-                      updatePArray("diagnoses", idx, "date", val)
-                    }
-                  />
-                  <label
-                    style={{
-                      flex: "1 1 200px",
-                      minWidth: "180px",
-                      fontSize: "13px",
-                      display: "flex",
-                      flexDirection: "column",
-                      boxSizing: "border-box",
-                      maxWidth: "100%",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 500,
-                        marginBottom: "6px",
-                        fontSize: "13px",
-                        color: "#111",
-                      }}
-                    >
-                      Status
-                    </div>
-                    <select
-                      value={statusVal}
-                      onChange={(e) =>
-                        updatePArray("diagnoses", idx, "status", e.target.value)
-                      }
-                      style={{
-                        ...baseInputShape,
-                        color: "#000",
-                        fontStyle: "normal",
-                      }}
-                    >
-                      <option value="confirmed">Confirmed</option>
-                      <option value="suspected">Suspected</option>
-                    </select>
-                  </label>
-                </div>
-              );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Diagnosis"
-            onClick={() =>
-              addPRow("diagnoses", {
-                name: "",
-                by: "",
-                date: "",
-                status: "confirmed",
-              })
+                  {/* Diagnoses */}
+<div
+  ref={sectionRefs.current.diagnoses}
+  data-section-id="diagnoses"
+>
+  <section style={cardOuterStyle}>
+    <header style={headerRowStyle}>
+      <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
+    </header>
+
+    { (Array.isArray(P_live.diagnoses) ? P_live.diagnoses : []).map((d, idx) => {
+      const dDefaults = (P_default.diagnoses || [])[idx] || {};
+
+      const statusVal = isNonEmptyString(d?.status)
+        ? d.status
+        : (dDefaults.status || "");
+
+      return (
+        <div key={idx} style={itemBoxStyle}>
+          <RowHeader>
+            <span>Diagnosis {idx + 1}</span>
+            <DeleteButton
+              onClick={() =>
+                removePRow("diagnoses", idx, {
+                  name: "",
+                  by: "",
+                  date: "",
+                  status: "",
+                })
+              }
+            />
+          </RowHeader>
+
+          <InputDemo
+            label="Name"
+            liveVal={d?.name || ""}
+            demoVal={dDefaults.name}
+            onChange={(val) =>
+              updatePArray("diagnoses", idx, "name", val)
             }
           />
-        </section>
-      </div>
+          <InputDemo
+            label="By (Clinician)"
+            liveVal={d?.by || ""}
+            demoVal={dDefaults.by}
+            onChange={(val) =>
+              updatePArray("diagnoses", idx, "by", val)
+            }
+          />
+          <InputDemo
+            label="Date"
+            liveVal={d?.date || ""}
+            demoVal={dDefaults.date}
+            onChange={(val) =>
+              updatePArray("diagnoses", idx, "date", val)
+            }
+          />
+
+          <label
+            style={{
+              flex: "1 1 200px",
+              minWidth: "180px",
+              fontSize: "13px",
+              display: "flex",
+              flexDirection: "column",
+              boxSizing: "border-box",
+              maxWidth: "100%",
+              marginBottom: "12px",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 500,
+                marginBottom: "6px",
+                fontSize: "13px",
+                color: "#111",
+              }}
+            >
+              Status
+            </div>
+            <select
+              value={statusVal}
+              onChange={(e) =>
+                updatePArray("diagnoses", idx, "status", e.target.value)
+              }
+              style={{
+                ...baseInputShape,
+                color: statusVal ? "#000" : "#6b7280",
+                fontStyle: statusVal ? "normal" : "italic",
+              }}
+            >
+              <option value="">— Select —</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="suspected">Suspected</option>
+            </select>
+          </label>
+        </div>
+      );
+    })}
+
+    <AddRowButton
+      label="+ Add Diagnosis"
+      onClick={() =>
+        addPRow("diagnoses", {
+          name: "",
+          by: "",
+          date: "",
+          status: "",
+        })
+      }
+    />
+  </section>
+</div>
+
 
       {/* Hospitalizations */}
       <div ref={sectionRefs.current.hosp} data-section-id="hosp">
@@ -1291,7 +1304,7 @@ export default function CardLayoutView({
           >
             Print / Save PDF
           </button>
-                   <button
+          <button
             type="button"
             onClick={handleClearForm}
             style={{
@@ -1306,8 +1319,6 @@ export default function CardLayoutView({
           >
             Clear form
           </button>
-
-
 
           <button
             type="button"
