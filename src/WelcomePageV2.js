@@ -1,7 +1,7 @@
 // src/WelcomePageV2.js
 import React from "react";
 
-function WelcomePageV2() {
+export default function WelcomePageV2({ onStart }) {
   return (
     <div
       style={{
@@ -150,9 +150,7 @@ function WelcomePageV2() {
               cursor: "pointer",
               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
             }}
-            onClick={() => {
-              alert("Create Account pressed (wire to signup)");
-            }}
+            onClick={onStart}
           >
             Create Account
           </button>
@@ -173,5 +171,3 @@ function WelcomePageV2() {
     </div>
   );
 }
-
-export default WelcomePageV2;
