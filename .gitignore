@@ -6,3 +6,4 @@ backups/
 .git_bak_*/
 *.log
 *.zip
+.DS_Store

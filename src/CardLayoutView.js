@@ -1,7 +1,7 @@
 // src/CardLayoutView.js
 /**
  * CardLayoutView.js
- * Screen view: full editor with floating Sections menu and bottom arrow.
+ * Screen editor + print-only narrative summary.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -28,6 +28,7 @@ function useIsMobile() {
 function isNonEmptyString(str) {
   return !!(str && String(str).trim() !== "");
 }
+
 function scrollToAbsoluteBottom() {
   const el = document.scrollingElement || document.documentElement;
   const go = () =>
@@ -52,6 +53,7 @@ const baseInputShape = {
   boxSizing: "border-box",
   backgroundColor: "#fff",
 };
+
 const baseTextareaShape = {
   width: "100%",
   maxWidth: "100%",
@@ -89,6 +91,7 @@ function SectionMini({ children }) {
     </div>
   );
 }
+
 function RowWrap({ children }) {
   return (
     <div
@@ -107,6 +110,7 @@ function RowWrap({ children }) {
     </div>
   );
 }
+
 function RowHeader({ children }) {
   return (
     <div
@@ -130,6 +134,7 @@ function RowHeader({ children }) {
     </div>
   );
 }
+
 function AddRowButton({ label, onClick }) {
   return (
     <button
@@ -151,6 +156,7 @@ function AddRowButton({ label, onClick }) {
     </button>
   );
 }
+
 function DeleteButton({ onClick }) {
   return (
     <button
@@ -244,8 +250,7 @@ function TextAreaDemo({
 
   useEffect(() => {
     if (_ta.current && autoResize) autoResize({ target: _ta.current });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, autoResize]);
 
   return (
     <label
@@ -303,6 +308,81 @@ function TextAreaDemo({
   );
 }
 
+/* ---------------------------
+   DEMO DEFAULTS (YOUR STORY)
+----------------------------*/
+const DEFAULT_PATIENT_DEFAULTS = {
+  name: "Jane Doe",
+  dob: "04/21/1984",
+  chronicProblemsText:
+    "ME/CFS, dysautonomia, and Type 2 diabetes causing long-term fatigue, weakness, dizziness, and limited mobility.",
+  diagnoses: [
+    {
+      name: "ME/CFS",
+      by: "Dr. L. Patel, Neurology",
+      date: "June 2008",
+      status: "confirmed",
+    },
+  ],
+  hospitalizations: [
+    {
+      why: "Severe dehydration and acute glucose crisis (diabetes)",
+      when: "March 2012",
+    },
+  ],
+  procedures: [
+    {
+      name: "Tilt table test",
+      date: "January 2014",
+      notes:
+        "Used to diagnose dysautonomia, showed abnormal heart rate response.",
+    },
+  ],
+  treatments: [
+    {
+      name: "Graded exercise therapy",
+      timeframe: "2015–2017",
+      effectiveness: "Ineffective, triggered flare-ups.",
+      sideEffects: "Worsened fatigue and muscle pain.",
+    },
+  ],
+  testsImaging: [
+    {
+      test: "Echocardiogram",
+      finding:
+        "Normal structure and function. Helped rule out cardiac cause of dizziness.",
+      date: "January 2014",
+    },
+  ],
+  doctors: [
+    {
+      name: "Dr. L. Patel",
+      specialty: "Neurology",
+      contact: "(555) 555-1200",
+    },
+  ],
+  allergies: [
+    {
+      item: "Sulfa drugs",
+      reaction: "Hives, shortness of breath",
+    },
+  ],
+  functionalImpact: `I am mostly bedridden and depend on others for basic tasks like meals, bathing, and transportation. Even minimal activity — such as standing or short conversations — quickly exhausts me or sends my symptoms into overdrive for days. My independence is severely limited; I rarely leave my home and require a wheelchair if I do. Cognitive fog makes organizing my thoughts and tasks difficult, so I need reminders for medications and appointments. Flare-ups mean unpredictable setbacks, making planning nearly impossible.`,
+};
+
+const DEFAULT_VISIT_DEFAULTS = {
+  symptoms: `In 2006, I experienced a severe case of Epstein-Barr virus that marked the beginning of a long decline in my health. Over the following years, I developed persistent fatigue, muscle weakness, and cognitive fog. I was later diagnosed with Myalgic Encephalomyelitis/Chronic Fatigue Syndrome (ME/CFS), along with dysautonomia and Type 2 diabetes. These conditions have progressively limited my mobility — I am now mostly bedridden and can walk only a few steps before becoming weak, dizzy, and short of breath. My daily functioning is severely restricted, and even small physical or mental efforts can trigger symptom flare-ups lasting days or weeks.`,
+  problemsTodayText:
+    "Extreme fatigue, muscle weakness, dizziness, cognitive fog, shortness of breath, blood sugar instability.",
+  meds: [
+    {
+      name: "Metformin",
+      dose: "500 mg",
+      freq: "Twice daily",
+    },
+  ],
+};
+
 /* =========================================================
    MAIN COMPONENT
 ========================================================= */
@@ -313,12 +393,45 @@ export default function CardLayoutView({
   mergeVisitData,
   patientDefaults,
   visitDefaults,
+  onLogout,
+  onPatientNameChange,
 }) {
-  const [localVisit, setLocalVisit] = useState(visitData || {});
+
+  // local fallbacks
+  const [localPatient, setLocalPatient] = useState(() => {
+    if (patientPermanent) return patientPermanent;
+    try {
+      const raw = localStorage.getItem("patientPermanent");
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  });
+  useEffect(() => {
+    if (typeof onPatientNameChange === "function") {
+      const name = (localPatient?.name || "").trim();
+      onPatientNameChange(name);
+    }
+  }, [localPatient?.name, onPatientNameChange]);
+
+
+  const [localVisit, setLocalVisit] = useState(() => {
+    if (visitData) return visitData;
+    try {
+      const raw = localStorage.getItem("patientVisit");
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  });
+
   const hasParent = typeof mergeVisitData === "function";
-  React.useEffect(() => {
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    if (patientPermanent) setLocalPatient(patientPermanent);
+  }, [patientPermanent]);
 
   useEffect(() => {
     if (hasParent) setLocalVisit(visitData || {});
@@ -342,38 +455,164 @@ export default function CardLayoutView({
     }
   };
 
+  // ensure visit arrays
   useEffect(() => {
     const base = hasParent ? visitData || {} : localVisit || {};
-    const next = {};
+    const patch = {};
     if (!Array.isArray(base.meds) || base.meds.length === 0) {
-      next.meds = [{ name: "", dose: "", freq: "" }];
+      patch.meds = [{ name: "", dose: "", freq: "" }];
     }
     if (!Array.isArray(base.problemsTodayList)) {
-      next.problemsTodayList = [];
+      patch.problemsTodayList = [];
     }
-    if (Object.keys(next).length > 0) {
-      mergeVisit(next);
+    if (Object.keys(patch).length > 0) {
+      mergeVisit(patch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // run once
 
-  const P_live = { ...(patientPermanent || {}) };
+  const P_live = { ...(patientPermanent || localPatient || {}) };
   const V_live = hasParent ? { ...(visitData || {}) } : { ...(localVisit || {}) };
-  const P_default = patientDefaults || {};
-  const V_default = visitDefaults || {};
-    // -------- Diagnoses helpers ----------
-  const diagnosesLive = Array.isArray(P_live.diagnoses)
-    ? P_live.diagnoses
-    : [];
+  const P_default = patientDefaults || DEFAULT_PATIENT_DEFAULTS;
+  const V_default = visitDefaults || DEFAULT_VISIT_DEFAULTS;
 
-  const hasRealDiagnosis = diagnosesLive.some((d) => {
-    const name = (d?.name || "").trim();
-    const by = (d?.by || "").trim();
-    const date = (d?.date || "").trim();
-    // real only if at least one text field is non-empty
-    return !!(name || by || date);
-  });
+  // "first time" detection: no stored patient AND no stored visit
+  const hasAnyPatientData =
+    (patientPermanent && Object.keys(patientPermanent).length > 0) ||
+    (localPatient && Object.keys(localPatient).length > 0);
+  const hasAnyVisitData =
+    (visitData && Object.keys(visitData).length > 0) ||
+    (localVisit && Object.keys(localVisit).length > 0);
+  const isInitialBlank = !hasAnyPatientData && !hasAnyVisitData;
 
+  // ==== PRINT-SPECIFIC DERIVED FIELDS ====
+
+  // simple fields
+  const nameForPrint =
+    isNonEmptyString(P_live.name) || !isInitialBlank
+      ? (P_live.name || "").trim()
+      : (P_default.name || "").trim();
+
+  const dobForPrint =
+    isNonEmptyString(P_live.dob) || !isInitialBlank
+      ? (P_live.dob || "").trim()
+      : (P_default.dob || "").trim();
+
+  const storyForPrint =
+    isNonEmptyString(V_live.symptoms) || !isInitialBlank
+      ? (V_live.symptoms || "").trim()
+      : (V_default.symptoms || "").trim();
+
+  const problemsForPrint =
+    isNonEmptyString(V_live.problemsTodayText) || !isInitialBlank
+      ? (V_live.problemsTodayText || "").trim()
+      : (V_default.problemsTodayText || "").trim();
+
+  const functionalImpactForPrint =
+    isNonEmptyString(P_live.functionalImpact) || !isInitialBlank
+      ? (P_live.functionalImpact || "").trim()
+      : (P_default.functionalImpact || "").trim();
+
+  // array helpers with filtering
+  function filterRows(arr, keys) {
+    if (!Array.isArray(arr)) return [];
+    return arr.filter((row) =>
+      keys.some((k) => isNonEmptyString(row && row[k]))
+    );
+  }
+
+  // diagnoses
+  const diagnosesFiltered = filterRows(P_live.diagnoses, [
+    "name",
+    "by",
+    "date",
+    "status",
+  ]);
+  const diagnosesForPrint =
+    diagnosesFiltered.length > 0
+      ? diagnosesFiltered
+      : isInitialBlank && Array.isArray(P_default.diagnoses)
+      ? P_default.diagnoses
+      : [];
+
+  // hospitalizations
+  const hospFiltered = filterRows(P_live.hospitalizations, ["why", "when"]);
+  const hospForPrint =
+    hospFiltered.length > 0
+      ? hospFiltered
+      : isInitialBlank && Array.isArray(P_default.hospitalizations)
+      ? P_default.hospitalizations
+      : [];
+
+  // procedures
+  const proceduresFiltered = filterRows(P_live.procedures, [
+    "name",
+    "date",
+    "notes",
+  ]);
+  const proceduresForPrint =
+    proceduresFiltered.length > 0
+      ? proceduresFiltered
+      : isInitialBlank && Array.isArray(P_default.procedures)
+      ? P_default.procedures
+      : [];
+
+  // treatments
+  const treatmentsFiltered = filterRows(P_live.treatments, [
+    "name",
+    "timeframe",
+    "effectiveness",
+    "sideEffects",
+  ]);
+  const treatmentsForPrint =
+    treatmentsFiltered.length > 0
+      ? treatmentsFiltered
+      : isInitialBlank && Array.isArray(P_default.treatments)
+      ? P_default.treatments
+      : [];
+
+  // tests & imaging
+  const testsFiltered = filterRows(P_live.testsImaging, [
+    "test",
+    "finding",
+    "date",
+  ]);
+  const testsForPrint =
+    testsFiltered.length > 0
+      ? testsFiltered
+      : isInitialBlank && Array.isArray(P_default.testsImaging)
+      ? P_default.testsImaging
+      : [];
+
+  // meds
+  const medsFiltered = filterRows(V_live.meds, ["name", "dose", "freq"]);
+  const medsForPrint =
+    medsFiltered.length > 0
+      ? medsFiltered
+      : isInitialBlank && Array.isArray(V_default.meds)
+      ? V_default.meds
+      : [];
+
+  // allergies
+  const allergiesFiltered = filterRows(P_live.allergies, ["item", "reaction"]);
+  const allergiesForPrint =
+    allergiesFiltered.length > 0
+      ? allergiesFiltered
+      : isInitialBlank && Array.isArray(P_default.allergies)
+      ? P_default.allergies
+      : [];
+
+  // doctors
+  const doctorsFiltered = filterRows(P_live.doctors, [
+    "name",
+    "specialty",
+    "contact",
+  ]);
+  const doctorsForPrint =
+    doctorsFiltered.length > 0
+      ? doctorsFiltered
+      : isInitialBlank && Array.isArray(P_default.doctors)
+      ? P_default.doctors
+      : [];
 
   const textareasRef = useRef([]);
   function autoResize(e) {
@@ -389,37 +628,58 @@ export default function CardLayoutView({
     });
   }, []);
 
+  // patient helpers
   function setP(next) {
-    setPatientPermanent(next);
+    const final = next || {};
+    if (typeof setPatientPermanent === "function") {
+      setPatientPermanent(final);
+    } else {
+      setLocalPatient(final);
+    }
+    try {
+      localStorage.setItem("patientPermanent", JSON.stringify(final));
+    } catch {}
   }
+
   function updateP(field, value) {
-    setP({ ...patientPermanent, [field]: value });
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: value });
   }
+
   function ensureArrayField(field) {
-    if (!Array.isArray(patientPermanent?.[field])) {
-      setP({ ...patientPermanent, [field]: [] });
+    const base = patientPermanent || localPatient || {};
+    if (!Array.isArray(base[field])) {
+      const updated = { ...base, [field]: [] };
+      setP(updated);
       return [];
     }
-    return patientPermanent[field];
+    return base[field];
   }
+
   function updatePArray(field, idx, key, value) {
     const arr = ensureArrayField(field).slice();
     if (!arr[idx]) arr[idx] = {};
     arr[idx] = { ...arr[idx], [key]: value };
-    setP({ ...patientPermanent, [field]: arr });
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: arr });
   }
+
   function addPRow(field, template) {
     const arr = ensureArrayField(field).slice();
     arr.push(template);
-    setP({ ...patientPermanent, [field]: arr });
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: arr });
   }
+
   function removePRow(field, idx, fallbackTemplate) {
     const arr = ensureArrayField(field).slice();
     arr.splice(idx, 1);
     if (arr.length === 0) arr.push(fallbackTemplate);
-    setP({ ...patientPermanent, [field]: arr });
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: arr });
   }
 
+  // visit helpers
   function updateVisitArray(field, idx, key, value) {
     const base = hasParent ? visitData || {} : localVisit || {};
     const currentArr = Array.isArray(base[field]) ? [...base[field]] : [];
@@ -427,12 +687,14 @@ export default function CardLayoutView({
     currentArr[idx] = { ...currentArr[idx], [key]: value };
     mergeVisit({ [field]: currentArr });
   }
+
   function addVisitRow(field, template) {
     const base = hasParent ? visitData || {} : localVisit || {};
     const arr = Array.isArray(base[field]) ? [...base[field]] : [];
     arr.push(template);
     mergeVisit({ [field]: arr });
   }
+
   function removeVisitRow(field, idx, fallbackTemplate) {
     const base = hasParent ? visitData || {} : localVisit || {};
     const arr = Array.isArray(base[field]) ? [...base[field]] : [];
@@ -446,11 +708,13 @@ export default function CardLayoutView({
     borderRadius: "12px",
     boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
     padding: "16px 20px",
+    marginBottom: "16px",
     pageBreakInside: "avoid",
     boxSizing: "border-box",
     width: "100%",
     maxWidth: "100%",
   };
+
   const headerRowStyle = {
     display: "flex",
     justifyContent: "space-between",
@@ -462,6 +726,7 @@ export default function CardLayoutView({
     width: "100%",
     maxWidth: "100%",
   };
+
   const cardHeaderTitleStyle = {
     margin: 0,
     fontSize: "15px",
@@ -471,6 +736,7 @@ export default function CardLayoutView({
     boxSizing: "border-box",
     maxWidth: "100%",
   };
+
   const itemBoxStyle = {
     border: "1px solid #ccc",
     borderRadius: "8px",
@@ -486,7 +752,6 @@ export default function CardLayoutView({
     { id: "patient", label: "Patient" },
     { id: "story", label: "Story" },
     { id: "reasons", label: "Reasons for Visit" },
-    { id: "chronic", label: "Chronic Problems" },
     { id: "diagnoses", label: "Diagnoses" },
     { id: "hosp", label: "Hospitalizations" },
     { id: "meds", label: "Meds & Allergies" },
@@ -496,20 +761,23 @@ export default function CardLayoutView({
     { id: "impact", label: "Functional Impact" },
     { id: "docs", label: "Doctors" },
   ];
-  const sectionRefs = useRef(
+
+    const sectionRefs = useRef(
     Object.fromEntries(SECTIONS.map((s) => [s.id, React.createRef()]))
   );
   const [currentSection, setCurrentSection] = useState(SECTIONS[0].id);
   const [tocOpen, setTocOpen] = useState(false);
-  const bottomRef = useRef(null);
-  const [showArrow, setShowArrow] = useState(false);
-  const [bottomVisible, setBottomVisible] = useState(false);
+
+  // always show the scroll arrow; no bottom sentinel / observers
+  const showArrow = true;
+
 
   const scrollToSection = (id) => {
     const el = sectionRefs.current[id]?.current;
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  // observe sections for currentSection
   useEffect(() => {
     const opts = {
       root: null,
@@ -529,36 +797,9 @@ export default function CardLayoutView({
       if (el) io.observe(el);
     });
     return () => io.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentSection, SECTIONS]);
 
-  useEffect(() => {
-    const el = bottomRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setBottomVisible(entry.isIntersecting),
-      { threshold: 1.0 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
-  useEffect(() => {
-    const onScrollResize = () => {
-      const doc = document.documentElement;
-      const full = doc.scrollHeight || document.body.scrollHeight || 0;
-      const viewport = window.innerHeight || doc.clientHeight || 0;
-      const pageScrollable = full > viewport + 40;
-      setShowArrow(pageScrollable && !bottomVisible);
-    };
-    onScrollResize();
-    window.addEventListener("scroll", onScrollResize, { passive: true });
-    window.addEventListener("resize", onScrollResize);
-    return () => {
-      window.removeEventListener("scroll", onScrollResize);
-      window.removeEventListener("resize", onScrollResize);
-    };
-  }, [bottomVisible]);
 
   function handleClearForm() {
     const ok = window.confirm(
@@ -566,15 +807,11 @@ export default function CardLayoutView({
     );
     if (!ok) return;
 
-    // 1) PATIENT-LEVEL: reset to empty values but keep one blank row
     const clearedPatient = {
-      // simple fields
       name: "",
       dob: "",
       chronicProblemsText: "",
       functionalImpact: "",
-
-      // arrays: 1 empty row each, so placeholders show but no real data
       diagnoses: [{ name: "", by: "", date: "", status: "" }],
       hospitalizations: [{ why: "", when: "" }],
       procedures: [{ name: "", date: "", notes: "" }],
@@ -591,30 +828,22 @@ export default function CardLayoutView({
       allergies: [{ item: "", reaction: "" }],
     };
 
-    if (typeof setPatientPermanent === "function") {
-      setPatientPermanent(clearedPatient);
-    }
+    setP(clearedPatient);
 
-    // 2) VISIT-LEVEL: clear text + 1 empty meds row
     const clearedVisit = {
-      // Story
       symptoms: "",
-      // Reasons
       problemsTodayText: "",
       problemsTodayList: [],
-      // Meds: exactly 1 blank row
       meds: [{ name: "", dose: "", freq: "" }],
     };
 
     setLocalVisit(clearedVisit);
 
-    // 3) Sync to localStorage so reload stays clean
     try {
       localStorage.setItem("patientPermanent", JSON.stringify(clearedPatient));
       localStorage.setItem("patientVisit", JSON.stringify(clearedVisit));
     } catch {}
 
-    // 4) Tell parent about cleared visit if it manages visitData
     if (typeof mergeVisitData === "function") {
       try {
         mergeVisitData(clearedVisit);
@@ -629,111 +858,197 @@ export default function CardLayoutView({
         fontFamily:
           "-apple-system,BlinkMacSystemFont,'SF Pro Text',Roboto,sans-serif",
         backgroundColor: "#f5f6f8",
-        minHeight: "100%",
+        minHeight: "100vh",
         padding: "16px",
+        paddingBottom: "32px",
         color: "#1a1a1a",
         maxWidth: "700px",
         margin: "0 auto",
         display: "flex",
         flexDirection: "column",
-        gap: "16px",
         boxSizing: "border-box",
         width: "100%",
       }}
     >
-      {/* Title */}
-      <header
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "12px",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-          padding: "16px 20px",
-          fontSize: "22px",
-          fontWeight: 600,
-          lineHeight: 1.3,
-          color: "#111",
-        }}
-      >
-        My Medical Summary
-      </header>
+      {/* ============== SCREEN EDITOR VIEW ============== */}
+      <div className="screen-only">
+        {/* Title */}
+        <header
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+            padding: "16px 20px",
+            fontSize: "22px",
+            fontWeight: 600,
+            lineHeight: 1.3,
+            color: "#111",
+            marginBottom: "16px",
+          }}
+        >
+          My Medical Summary
+        </header>
 
-      {/* Patient */}
-      <div ref={sectionRefs.current.patient} data-section-id="patient">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Patient</h2>
-          </header>
-          <RowWrap>
-            <InputDemo
-              label="Name"
-              liveVal={P_live.name}
-              demoVal={P_default.name}
-              onChange={(val) => updateP("name", val)}
+        {/* Patient */}
+        <div ref={sectionRefs.current.patient} data-section-id="patient">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Patient</h2>
+            </header>
+            <RowWrap>
+              <InputDemo
+                label="Name"
+                liveVal={P_live.name}
+                demoVal={P_default.name}
+                onChange={(val) => updateP("name", val)}
+              />
+              <InputDemo
+                label="DOB"
+                liveVal={P_live.dob}
+                demoVal={P_default.dob}
+                onChange={(val) => updateP("dob", val)}
+              />
+            </RowWrap>
+          </section>
+        </div>
+
+        {/* Story */}
+        <div ref={sectionRefs.current.story} data-section-id="story">
+          <section style={cardOuterStyle}>
+            <TextAreaDemo
+              label="Story"
+              liveVal={V_live.symptoms}
+              demoVal={V_default.symptoms}
+              onChange={(val) => mergeVisit({ symptoms: val })}
+              textRef={(el) => (textareasRef.current[0] = el)}
+              autoResize={autoResize}
             />
-            <InputDemo
-              label="DOB"
-              liveVal={P_live.dob}
-              demoVal={P_default.dob}
-              onChange={(val) => updateP("dob", val)}
+          </section>
+        </div>
+
+        {/* Reasons */}
+        <div ref={sectionRefs.current.reasons} data-section-id="reasons">
+          <section style={cardOuterStyle}>
+            <TextAreaDemo
+              label="Reasons for today's visit"
+              liveVal={V_live.problemsTodayText}
+              demoVal={V_default.problemsTodayText}
+              onChange={(val) =>
+                mergeVisit({ problemsTodayText: val, problemsTodayList: [] })
+              }
+              textRef={(el) => (textareasRef.current[1] = el)}
+              autoResize={autoResize}
             />
-          </RowWrap>
-        </section>
-      </div>
+          </section>
+        </div>
 
-      {/* Story */}
-      <div ref={sectionRefs.current.story} data-section-id="story">
-        <section style={cardOuterStyle}>
-          <TextAreaDemo
-            label="Story"
-            liveVal={V_live.symptoms}
-            demoVal={V_default.symptoms}
-            onChange={(val) => mergeVisit({ symptoms: val })}
-            textRef={(el) => (textareasRef.current[0] = el)}
-            autoResize={autoResize}
-          />
-        </section>
-      </div>
+        {/* Diagnoses */}
+        <div ref={sectionRefs.current.diagnoses} data-section-id="diagnoses">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
+            </header>
 
-      {/* Reasons */}
-      <div ref={sectionRefs.current.reasons} data-section-id="reasons">
-        <section style={cardOuterStyle}>
-          <TextAreaDemo
-            label="Reasons for today's visit"
-            liveVal={V_live.problemsTodayText}
-            demoVal={V_default.problemsTodayText}
-            onChange={(val) =>
-              mergeVisit({ problemsTodayText: val, problemsTodayList: [] })
-            }
-            textRef={(el) => (textareasRef.current[1] = el)}
-            autoResize={autoResize}
-          />
-        </section>
-      </div>
+            {(Array.isArray(P_live.diagnoses) ? P_live.diagnoses : []).map(
+              (d, idx) => {
+                const dDefaults = (P_default.diagnoses || [])[idx] || {};
+                const statusVal = isNonEmptyString(d?.status)
+                  ? d.status
+                  : dDefaults.status || "";
 
-                  {/* Diagnoses */}
-<div
-  ref={sectionRefs.current.diagnoses}
-  data-section-id="diagnoses"
->
-  <section style={cardOuterStyle}>
-    <header style={headerRowStyle}>
-      <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
-    </header>
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Diagnosis {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("diagnoses", idx, {
+                            name: "",
+                            by: "",
+                            date: "",
+                            status: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
 
-    { (Array.isArray(P_live.diagnoses) ? P_live.diagnoses : []).map((d, idx) => {
-      const dDefaults = (P_default.diagnoses || [])[idx] || {};
+                    <InputDemo
+                      label="Name"
+                      liveVal={d?.name || ""}
+                      demoVal={dDefaults.name}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "name", val)
+                      }
+                    />
+                    <InputDemo
+                      label="By (Clinician)"
+                      liveVal={d?.by || ""}
+                      demoVal={dDefaults.by}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "by", val)
+                      }
+                    />
+                    <InputDemo
+                      label="Date"
+                      liveVal={d?.date || ""}
+                      demoVal={dDefaults.date}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "date", val)
+                      }
+                    />
 
-      const statusVal = isNonEmptyString(d?.status)
-        ? d.status
-        : (dDefaults.status || "");
+                    <label
+                      style={{
+                        flex: "1 1 200px",
+                        minWidth: "180px",
+                        fontSize: "13px",
+                        display: "flex",
+                        flexDirection: "column",
+                        boxSizing: "border-box",
+                        maxWidth: "100%",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 500,
+                          marginBottom: "6px",
+                          fontSize: "13px",
+                          color: "#111",
+                        }}
+                      >
+                        Status
+                      </div>
+                      <select
+                        value={statusVal}
+                        onChange={(e) =>
+                          updatePArray(
+                            "diagnoses",
+                            idx,
+                            "status",
+                            e.target.value
+                          )
+                        }
+                        style={{
+                          ...baseInputShape,
+                          color: statusVal ? "#000" : "#6b7280",
+                          fontStyle: statusVal ? "normal" : "italic",
+                        }}
+                      >
+                        <option value="">— Select —</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="suspected">Suspected</option>
+                      </select>
+                    </label>
+                  </div>
+                );
+              }
+            )}
 
-      return (
-        <div key={idx} style={itemBoxStyle}>
-          <RowHeader>
-            <span>Diagnosis {idx + 1}</span>
-            <DeleteButton
+            <AddRowButton
+              label="+ Add Diagnosis"
               onClick={() =>
-                removePRow("diagnoses", idx, {
+                addPRow("diagnoses", {
                   name: "",
                   by: "",
                   date: "",
@@ -741,398 +1056,331 @@ export default function CardLayoutView({
                 })
               }
             />
-          </RowHeader>
-
-          <InputDemo
-            label="Name"
-            liveVal={d?.name || ""}
-            demoVal={dDefaults.name}
-            onChange={(val) =>
-              updatePArray("diagnoses", idx, "name", val)
-            }
-          />
-          <InputDemo
-            label="By (Clinician)"
-            liveVal={d?.by || ""}
-            demoVal={dDefaults.by}
-            onChange={(val) =>
-              updatePArray("diagnoses", idx, "by", val)
-            }
-          />
-          <InputDemo
-            label="Date"
-            liveVal={d?.date || ""}
-            demoVal={dDefaults.date}
-            onChange={(val) =>
-              updatePArray("diagnoses", idx, "date", val)
-            }
-          />
-
-          <label
-            style={{
-              flex: "1 1 200px",
-              minWidth: "180px",
-              fontSize: "13px",
-              display: "flex",
-              flexDirection: "column",
-              boxSizing: "border-box",
-              maxWidth: "100%",
-              marginBottom: "12px",
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 500,
-                marginBottom: "6px",
-                fontSize: "13px",
-                color: "#111",
-              }}
-            >
-              Status
-            </div>
-            <select
-              value={statusVal}
-              onChange={(e) =>
-                updatePArray("diagnoses", idx, "status", e.target.value)
-              }
-              style={{
-                ...baseInputShape,
-                color: statusVal ? "#000" : "#6b7280",
-                fontStyle: statusVal ? "normal" : "italic",
-              }}
-            >
-              <option value="">— Select —</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="suspected">Suspected</option>
-            </select>
-          </label>
+          </section>
         </div>
-      );
-    })}
 
-    <AddRowButton
-      label="+ Add Diagnosis"
-      onClick={() =>
-        addPRow("diagnoses", {
-          name: "",
-          by: "",
-          date: "",
-          status: "",
-        })
-      }
-    />
-  </section>
-</div>
-
-
-      {/* Hospitalizations */}
-      <div ref={sectionRefs.current.hosp} data-section-id="hosp">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Hospitalizations</h2>
-          </header>
-          {(Array.isArray(P_live.hospitalizations)
-            ? P_live.hospitalizations
-            : []
-          ).map((h, idx) => {
-            const hDefaults = (P_default.hospitalizations || [])[idx] || {};
-            return (
-              <div key={idx} style={itemBoxStyle}>
-                <RowHeader>
-                  <span>Hospitalization {idx + 1}</span>
-                  <DeleteButton
-                    onClick={() =>
-                      removePRow("hospitalizations", idx, { why: "", when: "" })
-                    }
-                  />
-                </RowHeader>
-                <InputDemo
-                  label="Why"
-                  liveVal={h?.why || ""}
-                  demoVal={hDefaults.why}
-                  onChange={(val) =>
-                    updatePArray("hospitalizations", idx, "why", val)
-                  }
-                />
-                <InputDemo
-                  label="When"
-                  liveVal={h?.when || ""}
-                  demoVal={hDefaults.when}
-                  onChange={(val) =>
-                    updatePArray("hospitalizations", idx, "when", val)
-                  }
-                />
-              </div>
-            );
-          })}
-          <AddRowButton
-            label="+ Add Hospitalization"
-            onClick={() =>
-              addPRow("hospitalizations", { why: "", when: "" })
-            }
-          />
-        </section>
-      </div>
-
-      {/* Meds & Allergies */}
-      <div ref={sectionRefs.current.meds} data-section-id="meds">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>
-              Current Medications & Allergies
-            </h2>
-          </header>
-
-          {(Array.isArray(V_live.meds)
-            ? V_live.meds
-            : [{ name: "", dose: "", freq: "" }]
-          ).map((m, idx) => {
-            const mDefaults = (V_default.meds || [])[idx] || {};
-            return (
-              <div key={idx} style={itemBoxStyle}>
-                <RowHeader>
-                  <span>Medication {idx + 1}</span>
-                  <DeleteButton
-                    onClick={() =>
-                      removeVisitRow("meds", idx, {
-                        name: "",
-                        dose: "",
-                        freq: "",
-                      })
-                    }
-                  />
-                </RowHeader>
-                <InputDemo
-                  label="Name"
-                  liveVal={m?.name || ""}
-                  demoVal={mDefaults.name}
-                  onChange={(val) =>
-                    updateVisitArray("meds", idx, "name", val)
-                  }
-                />
-                <InputDemo
-                  label="Dose"
-                  liveVal={m?.dose || ""}
-                  demoVal={mDefaults.dose}
-                  onChange={(val) =>
-                    updateVisitArray("meds", idx, "dose", val)
-                  }
-                />
-                <InputDemo
-                  label="Schedule"
-                  liveVal={m?.freq || ""}
-                  demoVal={mDefaults.freq}
-                  onChange={(val) =>
-                    updateVisitArray("meds", idx, "freq", val)
-                  }
-                />
-              </div>
-            );
-          })}
-          <AddRowButton
-            label="+ Add Medication"
-            onClick={() =>
-              addVisitRow("meds", { name: "", dose: "", freq: "" })
-            }
-          />
-
-          <SectionMini>Allergies</SectionMini>
-          {(Array.isArray(P_live.allergies) ? P_live.allergies : []).map(
-            (a, idx) => {
-              const aDefaults = (P_default.allergies || [])[idx] || {};
+        {/* Hospitalizations */}
+        <div ref={sectionRefs.current.hosp} data-section-id="hosp">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Hospitalizations</h2>
+            </header>
+            {(Array.isArray(P_live.hospitalizations)
+              ? P_live.hospitalizations
+              : []
+            ).map((h, idx) => {
+              const hDefaults = (P_default.hospitalizations || [])[idx] || {};
               return (
                 <div key={idx} style={itemBoxStyle}>
                   <RowHeader>
-                    <span>Allergy {idx + 1}</span>
+                    <span>Hospitalization {idx + 1}</span>
                     <DeleteButton
                       onClick={() =>
-                        removePRow("allergies", idx, { item: "", reaction: "" })
+                        removePRow("hospitalizations", idx, {
+                          why: "",
+                          when: "",
+                        })
                       }
                     />
                   </RowHeader>
                   <InputDemo
-                    label="To (What)"
-                    liveVal={a?.item || ""}
-                    demoVal={aDefaults.item}
+                    label="Why"
+                    liveVal={h?.why || ""}
+                    demoVal={hDefaults.why}
                     onChange={(val) =>
-                      updatePArray("allergies", idx, "item", val)
+                      updatePArray("hospitalizations", idx, "why", val)
                     }
                   />
                   <InputDemo
-                    label="What Happens (Reaction)"
-                    liveVal={a?.reaction || ""}
-                    demoVal={aDefaults.reaction}
+                    label="When"
+                    liveVal={h?.when || ""}
+                    demoVal={hDefaults.when}
                     onChange={(val) =>
-                      updatePArray("allergies", idx, "reaction", val)
+                      updatePArray("hospitalizations", idx, "when", val)
                     }
                   />
                 </div>
               );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Allergy"
-            onClick={() =>
-              addPRow("allergies", { item: "", reaction: "" })
-            }
-          />
-        </section>
-      </div>
+            })}
+            <AddRowButton
+              label="+ Add Hospitalization"
+              onClick={() =>
+                addPRow("hospitalizations", { why: "", when: "" })
+              }
+            />
+          </section>
+        </div>
 
-      {/* Procedures */}
-      <div ref={sectionRefs.current.procedures} data-section-id="procedures">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Procedures & Surgeries</h2>
-          </header>
-          {(Array.isArray(P_live.procedures) ? P_live.procedures : []).map(
-            (p, idx) => {
-              const pDefaults = (P_default.procedures || [])[idx] || {};
+        {/* Meds & Allergies */}
+        <div ref={sectionRefs.current.meds} data-section-id="meds">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>
+                Current Medications & Allergies
+              </h2>
+            </header>
+
+            {(Array.isArray(V_live.meds)
+              ? V_live.meds
+              : [{ name: "", dose: "", freq: "" }]
+            ).map((m, idx) => {
+              const mDefaults = (V_default.meds || [])[idx] || {};
               return (
                 <div key={idx} style={itemBoxStyle}>
                   <RowHeader>
-                    <span>Procedure {idx + 1}</span>
+                    <span>Medication {idx + 1}</span>
                     <DeleteButton
                       onClick={() =>
-                        removePRow("procedures", idx, {
+                        removeVisitRow("meds", idx, {
                           name: "",
-                          date: "",
-                          notes: "",
+                          dose: "",
+                          freq: "",
                         })
                       }
                     />
                   </RowHeader>
                   <InputDemo
                     label="Name"
-                    liveVal={p?.name || ""}
-                    demoVal={pDefaults.name}
+                    liveVal={m?.name || ""}
+                    demoVal={mDefaults.name}
                     onChange={(val) =>
-                      updatePArray("procedures", idx, "name", val)
+                      updateVisitArray("meds", idx, "name", val)
                     }
                   />
                   <InputDemo
-                    label="Approx Date"
-                    liveVal={p?.date || ""}
-                    demoVal={pDefaults.date}
+                    label="Dose"
+                    liveVal={m?.dose || ""}
+                    demoVal={mDefaults.dose}
                     onChange={(val) =>
-                      updatePArray("procedures", idx, "date", val)
+                      updateVisitArray("meds", idx, "dose", val)
                     }
                   />
-                  <TextAreaDemo
-                    label="Notes"
-                    liveVal={p?.notes || ""}
-                    demoVal={pDefaults.notes}
+                  <InputDemo
+                    label="Schedule"
+                    liveVal={m?.freq || ""}
+                    demoVal={mDefaults.freq}
                     onChange={(val) =>
-                      updatePArray("procedures", idx, "notes", val)
+                      updateVisitArray("meds", idx, "freq", val)
                     }
-                    textRef={(el) => {
-                      textareasRef.current[10000 + idx] = el;
-                    }}
-                    autoResize={autoResize}
                   />
                 </div>
               );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Procedure"
-            onClick={() =>
-              addPRow("procedures", { name: "", date: "", notes: "" })
-            }
-          />
-        </section>
-      </div>
+            })}
+            <AddRowButton
+              label="+ Add Medication"
+              onClick={() =>
+                addVisitRow("meds", { name: "", dose: "", freq: "" })
+              }
+            />
 
-      {/* Treatments */}
-      <div ref={sectionRefs.current.treatments} data-section-id="treatments">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Treatments</h2>
-          </header>
-          {(Array.isArray(P_live.treatments) ? P_live.treatments : []).map(
-            (t, idx) => {
-              const tDefaults = (P_default.treatments || [])[idx] || {};
-              return (
-                <div key={idx} style={itemBoxStyle}>
-                  <RowHeader>
-                    <span>Treatment {idx + 1}</span>
-                    <DeleteButton
-                      onClick={() =>
-                        removePRow("treatments", idx, {
-                          name: "",
-                          timeframe: "",
-                          effectiveness: "",
-                          sideEffects: "",
-                        })
+            <SectionMini>Allergies</SectionMini>
+            {(Array.isArray(P_live.allergies) ? P_live.allergies : []).map(
+              (a, idx) => {
+                const aDefaults = (P_default.allergies || [])[idx] || {};
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Allergy {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("allergies", idx, {
+                            item: "",
+                            reaction: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
+                    <InputDemo
+                      label="To (What)"
+                      liveVal={a?.item || ""}
+                      demoVal={aDefaults.item}
+                      onChange={(val) =>
+                        updatePArray("allergies", idx, "item", val)
                       }
                     />
-                  </RowHeader>
-                  <InputDemo
-                    label="Name"
-                    liveVal={t?.name || ""}
-                    demoVal={tDefaults.name}
-                    onChange={(val) =>
-                      updatePArray("treatments", idx, "name", val)
-                    }
-                  />
-                  <InputDemo
-                    label="Timeframe"
-                    liveVal={t?.timeframe || ""}
-                    demoVal={tDefaults.timeframe}
-                    onChange={(val) =>
-                      updatePArray("treatments", idx, "timeframe", val)
-                    }
-                  />
-                  <TextAreaDemo
-                    label="Effectiveness"
-                    liveVal={t?.effectiveness || ""}
-                    demoVal={tDefaults.effectiveness}
-                    onChange={(val) =>
-                      updatePArray("treatments", idx, "effectiveness", val)
-                    }
-                    textRef={(el) => {
-                      textareasRef.current[20000 + idx] = el;
-                    }}
-                    autoResize={autoResize}
-                  />
-                  <TextAreaDemo
-                    label="Side Effects"
-                    liveVal={t?.sideEffects || ""}
-                    demoVal={tDefaults.sideEffects}
-                    onChange={(val) =>
-                      updatePArray("treatments", idx, "sideEffects", val)
-                    }
-                    textRef={(el) => {
-                      textareasRef.current[30000 + idx] = el;
-                    }}
-                    autoResize={autoResize}
-                  />
-                </div>
-              );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Treatment"
-            onClick={() =>
-              addPRow("treatments", {
-                name: "",
-                timeframe: "",
-                effectiveness: "",
-                sideEffects: "",
-              })
-            }
-          />
-        </section>
-      </div>
+                    <InputDemo
+                      label="What Happens (Reaction)"
+                      liveVal={a?.reaction || ""}
+                      demoVal={aDefaults.reaction}
+                      onChange={(val) =>
+                        updatePArray("allergies", idx, "reaction", val)
+                      }
+                    />
+                  </div>
+                );
+              }
+            )}
+            <AddRowButton
+              label="+ Add Allergy"
+              onClick={() =>
+                addPRow("allergies", { item: "", reaction: "" })
+              }
+            />
+          </section>
+        </div>
 
-      {/* Tests & Imaging */}
-      <div ref={sectionRefs.current.tests} data-section-id="tests">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Tests & Imaging</h2>
-          </header>
-          {(Array.isArray(P_live.testsImaging) ? P_live.testsImaging : []).map(
-            (ti, idx) => {
+        {/* Procedures */}
+        <div
+          ref={sectionRefs.current.procedures}
+          data-section-id="procedures"
+        >
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Procedures & Surgeries</h2>
+            </header>
+            {(Array.isArray(P_live.procedures) ? P_live.procedures : []).map(
+              (p, idx) => {
+                const pDefaults = (P_default.procedures || [])[idx] || {};
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Procedure {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("procedures", idx, {
+                            name: "",
+                            date: "",
+                            notes: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
+                    <InputDemo
+                      label="Name"
+                      liveVal={p?.name || ""}
+                      demoVal={pDefaults.name}
+                      onChange={(val) =>
+                        updatePArray("procedures", idx, "name", val)
+                      }
+                    />
+                    <InputDemo
+                      label="Approx Date"
+                      liveVal={p?.date || ""}
+                      demoVal={pDefaults.date}
+                      onChange={(val) =>
+                        updatePArray("procedures", idx, "date", val)
+                      }
+                    />
+                    <TextAreaDemo
+                      label="Notes"
+                      liveVal={p?.notes || ""}
+                      demoVal={pDefaults.notes}
+                      onChange={(val) =>
+                        updatePArray("procedures", idx, "notes", val)
+                      }
+                      textRef={(el) => {
+                        textareasRef.current[10000 + idx] = el;
+                      }}
+                      autoResize={autoResize}
+                    />
+                  </div>
+                );
+              }
+            )}
+            <AddRowButton
+              label="+ Add Procedure"
+              onClick={() =>
+                addPRow("procedures", { name: "", date: "", notes: "" })
+              }
+            />
+          </section>
+        </div>
+
+        {/* Treatments */}
+        <div
+          ref={sectionRefs.current.treatments}
+          data-section-id="treatments"
+        >
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Treatments</h2>
+            </header>
+            {(Array.isArray(P_live.treatments) ? P_live.treatments : []).map(
+              (t, idx) => {
+                const tDefaults = (P_default.treatments || [])[idx] || {};
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Treatment {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("treatments", idx, {
+                            name: "",
+                            timeframe: "",
+                            effectiveness: "",
+                            sideEffects: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
+                    <InputDemo
+                      label="Name"
+                      liveVal={t?.name || ""}
+                      demoVal={tDefaults.name}
+                      onChange={(val) =>
+                        updatePArray("treatments", idx, "name", val)
+                      }
+                    />
+                    <InputDemo
+                      label="Timeframe"
+                      liveVal={t?.timeframe || ""}
+                      demoVal={tDefaults.timeframe}
+                      onChange={(val) =>
+                        updatePArray("treatments", idx, "timeframe", val)
+                      }
+                    />
+                    <TextAreaDemo
+                      label="Effectiveness"
+                      liveVal={t?.effectiveness || ""}
+                      demoVal={tDefaults.effectiveness}
+                      onChange={(val) =>
+                        updatePArray("treatments", idx, "effectiveness", val)
+                      }
+                      textRef={(el) => {
+                        textareasRef.current[20000 + idx] = el;
+                      }}
+                      autoResize={autoResize}
+                    />
+                    <TextAreaDemo
+                      label="Side Effects"
+                      liveVal={t?.sideEffects || ""}
+                      demoVal={tDefaults.sideEffects}
+                      onChange={(val) =>
+                        updatePArray("treatments", idx, "sideEffects", val)
+                      }
+                      textRef={(el) => {
+                        textareasRef.current[30000 + idx] = el;
+                      }}
+                      autoResize={autoResize}
+                    />
+                  </div>
+                );
+              }
+            )}
+            <AddRowButton
+              label="+ Add Treatment"
+              onClick={() =>
+                addPRow("treatments", {
+                  name: "",
+                  timeframe: "",
+                  effectiveness: "",
+                  sideEffects: "",
+                })
+              }
+            />
+          </section>
+        </div>
+
+        {/* Tests & Imaging */}
+        <div ref={sectionRefs.current.tests} data-section-id="tests">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Tests & Imaging</h2>
+            </header>
+            {(Array.isArray(P_live.testsImaging)
+              ? P_live.testsImaging
+              : []
+            ).map((ti, idx) => {
               const tiDefaults = (P_default.testsImaging || [])[idx] || {};
               return (
                 <div key={idx} style={itemBoxStyle}>
@@ -1178,296 +1426,532 @@ export default function CardLayoutView({
                   />
                 </div>
               );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Test"
-            onClick={() =>
-              addPRow("testsImaging", { test: "", finding: "", date: "" })
-            }
-          />
-        </section>
-      </div>
+            })}
+            <AddRowButton
+              label="+ Add Test"
+              onClick={() =>
+                addPRow("testsImaging", { test: "", finding: "", date: "" })
+              }
+            />
+          </section>
+        </div>
 
-      {/* Functional Impact */}
-      <div ref={sectionRefs.current.impact} data-section-id="impact">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Functional Impact</h2>
-          </header>
-          <TextAreaDemo
-            label="Describe how illness affects daily life, mobility, independence"
-            liveVal={P_live.functionalImpact}
-            demoVal={P_default.functionalImpact}
-            onChange={(val) => updateP("functionalImpact", val)}
-            textRef={(el) => (textareasRef.current[3] = el)}
-            autoResize={autoResize}
-          />
-        </section>
-      </div>
+        {/* Functional Impact */}
+        <div ref={sectionRefs.current.impact} data-section-id="impact">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Functional Impact</h2>
+            </header>
+            <TextAreaDemo
+              label="Describe how illness affects daily life, mobility, independence"
+              liveVal={P_live.functionalImpact}
+              demoVal={P_default.functionalImpact}
+              onChange={(val) => updateP("functionalImpact", val)}
+              textRef={(el) => (textareasRef.current[3] = el)}
+              autoResize={autoResize}
+            />
+          </section>
+        </div>
 
-      {/* Doctors */}
-      <div ref={sectionRefs.current.docs} data-section-id="docs">
-        <section style={cardOuterStyle}>
-          <header style={headerRowStyle}>
-            <h2 style={cardHeaderTitleStyle}>Doctors / Specialists</h2>
-          </header>
-          {(Array.isArray(P_live.doctors) ? P_live.doctors : []).map(
-            (d, idx) => {
-              const dDefaults = (P_default.doctors || [])[idx] || {};
-              return (
-                <div key={idx} style={itemBoxStyle}>
-                  <RowHeader>
-                    <span>Doctor {idx + 1}</span>
-                    <DeleteButton
-                      onClick={() =>
-                        removePRow("doctors", idx, {
-                          name: "",
-                          specialty: "",
-                          contact: "",
-                        })
+        {/* Doctors */}
+        <div ref={sectionRefs.current.docs} data-section-id="docs">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Doctors / Specialists</h2>
+            </header>
+            {(Array.isArray(P_live.doctors) ? P_live.doctors : []).map(
+              (d, idx) => {
+                const dDefaults = (P_default.doctors || [])[idx] || {};
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Doctor {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("doctors", idx, {
+                            name: "",
+                            specialty: "",
+                            contact: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
+                    <InputDemo
+                      label="Name"
+                      liveVal={d?.name || ""}
+                      demoVal={dDefaults.name}
+                      onChange={(val) =>
+                        updatePArray("doctors", idx, "name", val)
                       }
                     />
-                  </RowHeader>
-                  <InputDemo
-                    label="Name"
-                    liveVal={d?.name || ""}
-                    demoVal={dDefaults.name}
-                    onChange={(val) =>
-                      updatePArray("doctors", idx, "name", val)
-                    }
-                  />
-                  <InputDemo
-                    label="Specialty"
-                    liveVal={d?.specialty || ""}
-                    demoVal={dDefaults.specialty}
-                    onChange={(val) =>
-                      updatePArray("doctors", idx, "specialty", val)
-                    }
-                  />
-                  <InputDemo
-                    label="Contact"
-                    liveVal={d?.contact || ""}
-                    demoVal={dDefaults.contact}
-                    onChange={(val) =>
-                      updatePArray("doctors", idx, "contact", val)
-                    }
-                  />
-                </div>
-              );
-            }
-          )}
-          <AddRowButton
-            label="+ Add Doctor"
-            onClick={() =>
-              addPRow("doctors", { name: "", specialty: "", contact: "" })
-            }
-          />
-        </section>
-      </div>
-
-      {/* Action buttons */}
-      <section
-        style={{
-          ...cardOuterStyle,
-          backgroundColor: "transparent",
-          boxShadow: "none",
-          border: "0",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "16px",
-            marginTop: "16px",
-            flexWrap: "wrap",
-            width: "100%",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              window.print();
-            }}
-            style={{
-              padding: "12px 20px",
-              borderRadius: 12,
-              border: "none",
-              background: "#009024ff",
-              color: "#ffffffff",
-              border: "1px solid #bbb",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Print / Save PDF
-          </button>
-          <button
-            type="button"
-            onClick={handleClearForm}
-            style={{
-              padding: "12px 20px",
-              borderRadius: 12,
-              border: "1px solid #b91c1c",
-              background: "#b91c1c",
-              color: "#fff",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Clear form
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              try {
-                localStorage.removeItem("auth_session_user");
-                sessionStorage.clear();
-              } catch {}
-              window.location.reload();
-            }}
-            style={{
-              padding: "12px 20px",
-              borderRadius: 12,
-              border: "1px solid #bbb",
-              background: "#f6f6f6",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
+                    <InputDemo
+                      label="Specialty"
+                      liveVal={d?.specialty || ""}
+                      demoVal={dDefaults.specialty}
+                      onChange={(val) =>
+                        updatePArray("doctors", idx, "specialty", val)
+                      }
+                    />
+                    <InputDemo
+                      label="Contact"
+                      liveVal={d?.contact || ""}
+                      demoVal={dDefaults.contact}
+                      onChange={(val) =>
+                        updatePArray("doctors", idx, "contact", val)
+                      }
+                    />
+                  </div>
+                );
+              }
+            )}
+            <AddRowButton
+              label="+ Add Doctor"
+              onClick={() =>
+                addPRow("doctors", {
+                  name: "",
+                  specialty: "",
+                  contact: "",
+                })
+              }
+            />
+          </section>
         </div>
-      </section>
 
-      {/* bottom sentinel */}
-      <div ref={bottomRef} aria-hidden style={{ height: 1 }} />
-
-      {/* Floating Section Nav */}
-      <div
-        className="no-print"
-        aria-label="Section navigator"
-        style={{ position: "fixed", top: 100, right: 16, zIndex: 2000 }}
-      >
-        <button
-          type="button"
-          aria-expanded={tocOpen}
-          onClick={() => setTocOpen((v) => !v)}
-          title={tocOpen ? "Hide sections" : "Show sections"}
+        {/* Action buttons */}
+        <section
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: "999px",
-            border: "1px solid #d1d5db",
-            background: "#fff",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-            cursor: "pointer",
-            display: "grid",
-            placeItems: "center",
+            ...cardOuterStyle,
+            backgroundColor: "transparent",
+            boxShadow: "none",
+            border: "0",
           }}
         >
           <div
-            aria-hidden
             style={{
-              width: 18,
-              height: 2,
-              background: "#111",
-              boxShadow: "0 6px 0 #111, 0 -6px 0 #111",
-              transform: tocOpen ? "rotate(90deg)" : "none",
-              transition: "transform 160ms ease",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "16px",
+              marginTop: "16px",
+              flexWrap: "wrap",
+              width: "100%",
             }}
-          />
-        </button>
+          >
+            <button
+              type="button"
+              className="no-print"
+              onClick={() => {
+                window.print();
+              }}
+              style={{
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "none",
+                background: "#009024ff",
+                color: "#ffffffff",
+                border: "1px solid #bbb",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Print / Save PDF
+            </button>
+            <button
+              type="button"
+              className="no-print"
+              onClick={handleClearForm}
+              style={{
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "1px solid #b91c1c",
+                background: "#b91c1c",
+                color: "#fff",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Clear form
+            </button>
 
-        {tocOpen && (
-          <div
-            role="menu"
+            <button
+              type="button"
+              className="no-print"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof onLogout === "function") {
+                  onLogout();
+                } else {
+                  try {
+                    localStorage.removeItem("seenUser");
+                  } catch {}
+                  window.location.href = "/";
+                }
+              }}
+              style={{
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "1px solid #bbb",
+                background: "#f6f6f6",
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        </section>
+
+        {/* Floating Section Nav */}
+        <div
+          className="no-print"
+          aria-label="Section navigator"
+          style={{
+            position: "fixed",
+            top: 96,
+            right: 16,
+            zIndex: 2000,
+          }}
+        >
+          <button
+            type="button"
+            aria-expanded={tocOpen}
+            onClick={() => setTocOpen((v) => !v)}
+            title={tocOpen ? "Hide sections" : "Show sections"}
             style={{
-              marginTop: 10,
-              width: 220,
-              maxHeight: "60vh",
-              overflow: "auto",
-              background: "#fff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 12,
-              boxShadow: "0 12px 28px rgba(0,0,0,0.16)",
-              padding: 10,
+              width: 44,
+              height: 44,
+              borderRadius: "999px",
+              border: "1px solid #d1d5db",
+              background: "rgba(255,255,255,0.86)",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+              cursor: "pointer",
+              display: "grid",
+              placeItems: "center",
+              backdropFilter: "blur(4px)",
             }}
           >
             <div
+              aria-hidden
               style={{
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: 0.3,
-                color: "#374151",
-                marginBottom: 8,
-                textTransform: "uppercase",
+                width: 18,
+                height: 2,
+                background: "#111",
+                boxShadow: "0 6px 0 #111, 0 -6px 0 #111",
+                transform: tocOpen ? "rotate(90deg)" : "none",
+                transition: "transform 160ms ease",
+              }}
+            />
+          </button>
+
+          {tocOpen && (
+            <div
+              role="menu"
+              style={{
+                marginTop: 10,
+                width: 220,
+                maxHeight: "60vh",
+                overflow: "hidden", // no scroll bar
+                background: "rgba(255,255,255,0.86)",
+                border: "1px solid #e5e7eb",
+                borderRadius: 12,
+                boxShadow: "0 12px 28px rgba(0,0,0,0.16)",
+                padding: 10,
+                backdropFilter: "blur(4px)",
               }}
             >
-              Sections
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 0.3,
+                  color: "#374151",
+                  marginBottom: 8,
+                  textTransform: "uppercase",
+                }}
+              >
+                Sections
+              </div>
+              {SECTIONS.map((s) => {
+                const active = s.id === currentSection;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      setTocOpen(false);
+                      scrollToSection(s.id);
+                    }}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      border: "none",
+                      background: active
+                        ? "rgba(17,24,39,0.9)"
+                        : "transparent",
+                      color: active ? "#fff" : "#111",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
-            {SECTIONS.map((s) => {
-              const active = s.id === currentSection;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    setTocOpen(false);
-                    scrollToSection(s.id);
-                  }}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "8px 10px",
-                    borderRadius: 8,
-                    border: "none",
-                    background: active ? "#111827" : "transparent",
-                    color: active ? "#fff" : "#111",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    marginBottom: 4,
-                  }}
-                >
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
+          )}
+        </div>
+
+        {/* Down Arrow */}
+        {showArrow && (
+          <button
+            type="button"
+            className="no-print"
+            onClick={scrollToAbsoluteBottom}
+            aria-label="Scroll to bottom"
+            title="Scroll to bottom"
+            style={{
+              position: "fixed",
+              right: 16,
+              bottom: 16,
+              width: 48,
+              height: 48,
+              borderRadius: "999px",
+              border: "1px solid #d1d5db",
+              background: "#fff",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              zIndex: 2200,
+            }}
+          >
+            <span style={{ fontSize: 22, lineHeight: 1 }}>↓</span>
+          </button>
         )}
       </div>
 
-      {/* Down Arrow */}
-      {showArrow && (
-        <button
-          type="button"
-          className="no-print"
-          onClick={scrollToAbsoluteBottom}
-          aria-label="Scroll to bottom"
-          title="Scroll to bottom"
+      {/* ============== PRINT-ONLY NARRATIVE SUMMARY ============== */}
+      <div className="print-only">
+        <div
           style={{
-            position: "fixed",
-            right: 16,
-            bottom: 16,
-            width: 48,
-            height: 48,
-            borderRadius: "999px",
-            border: "1px solid #d1d5db",
-            background: "#fff",
-            boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
-            display: "grid",
-            placeItems: "center",
-            cursor: "pointer",
-            zIndex: 2200,
+            maxWidth: "700px",
+            margin: "0 auto",
+            padding: "0.5in 0",
+            fontFamily:
+              "-apple-system,BlinkMacSystemFont,'SF Pro Text',Roboto,sans-serif",
+            fontSize: "9pt", // slightly smaller
+            lineHeight: 1.4,
+            color: "#111827",
           }}
         >
-          <span style={{ fontSize: 22, lineHeight: 1 }}>↓</span>
-        </button>
-      )}
+          <h1
+            style={{
+              fontSize: "18pt",
+              margin: "0 0 8pt 0",
+            }}
+          >
+            Patient Medical Summary
+          </h1>
+
+          {/* Patient line only if at least one of name/DOB */}
+          {(isNonEmptyString(nameForPrint) || isNonEmptyString(dobForPrint)) && (
+            <p style={{ margin: "0 0 6pt 0" }}>
+              {isNonEmptyString(nameForPrint) && (
+                <>
+                  <strong>Patient:</strong> {nameForPrint}
+                  {isNonEmptyString(dobForPrint) && " · "}
+                </>
+              )}
+              {isNonEmptyString(dobForPrint) && (
+                <>
+                  <strong>DOB:</strong> {dobForPrint}
+                </>
+              )}
+            </p>
+          )}
+
+          {/* Story */}
+          {isNonEmptyString(storyForPrint) && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>Story</h2>
+              <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                {storyForPrint}
+              </p>
+            </section>
+          )}
+
+          {/* Problems Today */}
+          {isNonEmptyString(problemsForPrint) && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Problems Today
+              </h2>
+              <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                {problemsForPrint}
+              </p>
+            </section>
+          )}
+
+          {/* Diagnoses */}
+          {diagnosesForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Diagnoses
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {diagnosesForPrint.map((d, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {d.name && <strong>{d.name}</strong>}
+                    {d.status && <> ({d.status})</>}
+                    {d.by && <> – {d.by}</>}
+                    {d.date && <> – {d.date}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Hospitalizations */}
+          {hospForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Hospitalizations
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {hospForPrint.map((h, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {h.why && <strong>{h.why}</strong>}
+                    {h.when && <> – {h.when}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Medications */}
+          {medsForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Current Medications
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {medsForPrint.map((m, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {m.name && <strong>{m.name}</strong>}
+                    {m.dose && <> – {m.dose}</>}
+                    {m.freq && <> – {m.freq}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Allergies */}
+          {allergiesForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Allergies
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {allergiesForPrint.map((a, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {a.item && <strong>{a.item}</strong>}
+                    {a.reaction && <> – {a.reaction}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Procedures */}
+          {proceduresForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Procedures & Surgeries
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {proceduresForPrint.map((p, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {p.name && <strong>{p.name}</strong>}
+                    {p.date && <> – {p.date}</>}
+                    {p.notes && <>. {p.notes}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Treatments */}
+          {treatmentsForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Treatments
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {treatmentsForPrint.map((t, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {t.name && <strong>{t.name}</strong>}
+                    {t.timeframe && <> – {t.timeframe}</>}
+                    {t.effectiveness && <>. {t.effectiveness}</>}
+                    {t.sideEffects && <> Side effects: {t.sideEffects}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Tests & Imaging */}
+          {testsForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Tests & Imaging
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {testsForPrint.map((ti, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {ti.test && <strong>{ti.test}</strong>}
+                    {ti.date && <> – {ti.date}</>}
+                    {ti.finding && <>. {ti.finding}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Functional impact */}
+          {isNonEmptyString(functionalImpactForPrint) && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Functional Impact
+              </h2>
+              <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                {functionalImpactForPrint}
+              </p>
+            </section>
+          )}
+
+          {/* Doctors */}
+          {doctorsForPrint.length > 0 && (
+            <section className="print-section" style={{ marginBottom: "12pt" }}>
+              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
+                Doctors / Specialists
+              </h2>
+              <ul style={{ marginTop: 0, paddingLeft: "18pt" }}>
+                {doctorsForPrint.map((d, idx) => (
+                  <li key={idx} style={{ marginBottom: "4pt" }}>
+                    {d.name && <strong>{d.name}</strong>}
+                    {d.specialty && <> – {d.specialty}</>}
+                    {d.contact && <> – {d.contact}</>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

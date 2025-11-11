@@ -1,50 +1,61 @@
 {
   "name": "seen",
-  "productName": "SEEN",
   "version": "0.1.0",
-  "description": "SEEN: Empowering Patient Communication.",
   "private": true,
-  "homepage": ".",
+  "description": "SEEN – private patient summary app.",
+  "author": "Leor Mugrabi",
   "main": "electron/main.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/leormug/seen-app.git"
+  "homepage": "./",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
+    
+
+  },
+  "devDependencies": {
+    "assert": "^2.1.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "electron": "^32.1.0",
+    "electron-builder": "^24.13.3",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win"
   },
-  "dependencies": {
-    "@capacitor/cli": "^7.4.4",
-    "@capacitor/core": "^7.4.4",
-    "@capacitor/ios": "^7.4.4",
-    "bcryptjs": "^2.4.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-methods": "^7.18.6",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "buffer": "^6.0.3",
-    "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3",
-    "crypto-browserify": "^3.12.1",
-    "electron": "^32.2.0",
-    "electron-builder": "^24.13.3",
-    "process": "^0.11.10",
-    "react-app-rewired": "^2.2.1",
-    "stream-browserify": "^3.0.0",
-    "vm-browserify": "^1.1.2",
-    "wait-on": "^7.0.1"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "build": {
+    "appId": "com.seen.mymedicalapp",
+    "productName": "SEEN",
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.medical",
+      "icon": "assets/icon.icns"
+    },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "${productName}-Setup-${version}.exe",
+      "icon": "assets/icon.ico"
+    }
   },
   "browserslist": {
     "production": [
@@ -57,44 +68,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "build": {
-    "appId": "com.seen.app",
-    "productName": "SEEN",
-    "files": [
-      "build/**/*",
-      "electron/**/*",
-      "package.json"
-    ],
-    "extraMetadata": {
-      "main": "electron/main.js"
-    },
-    "directories": {
-      "output": "dist",
-      "buildResources": "electron"
-    },
-    "mac": {
-      "target": [
-        "zip"
-      ],
-      "icon": "electron/app.icns"
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "zip"
-      ],
-      "icon": "electron/app.ico",
-      "artifactName": "SEEN-${version}-win-${arch}.${ext}"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Utility",
-      "icon": "public/icon.png",
-      "artifactName": "SEEN-${version}-linux-${arch}.${ext}"
-    }
   }
 }
