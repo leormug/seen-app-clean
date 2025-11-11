@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
+import AppButton from "./components/AppButton";
 
 // Fallback demo defaults for a brand-new user
 const PATIENT_DEFAULTS_FALLBACK = {
@@ -1599,89 +1600,70 @@ function updatePArray(field, idx, key, value) {
         </div>
 
         {/* Action buttons */}
-        <section
-          style={{
-            ...cardOuterStyle,
-            backgroundColor: "transparent",
-            boxShadow: "none",
-            border: "0",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "16px",
-              marginTop: "16px",
-              flexWrap: "wrap",
-              width: "100%",
-            }}
-          >
-            <button
-              type="button"
-              className="no-print"
-              onClick={() => {
-                window.print();
-              }}
-              style={{
-                padding: "12px 20px",
-                borderRadius: 12,
-                border: "none",
-                background: "#009024ff",
-                color: "#ffffffff",
-                border: "1px solid #bbb",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Print / Save PDF
-            </button>
-            <button
-              type="button"
-              className="no-print"
-              onClick={handleClearForm}
-              style={{
-                padding: "12px 20px",
-                borderRadius: 12,
-                border: "1px solid #b91c1c",
-                background: "#b91c1c",
-                color: "#fff",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Clear form
-            </button>
+<section
+  style={{
+    ...cardOuterStyle,
+    backgroundColor: "transparent",
+    boxShadow: "none",
+    border: "0",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: "16px",
+      marginTop: "16px",
+      flexWrap: "wrap",
+      width: "100%",
+    }}
+  >
+    <AppButton
+      type="button"
+      className="no-print"
+      variant="primary"
+      size="md"
+      onClick={() => {
+        window.print();
+      }}
+    >
+      Print / Save PDF
+    </AppButton>
 
-            <button
-              type="button"
-              className="no-print"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof onLogout === "function") {
-                  onLogout();
-                } else {
-                  try {
-                    localStorage.removeItem("seenUser");
-                  } catch {}
-                  window.location.href = "/";
-                }
-              }}
-              style={{
-                padding: "12px 20px",
-                borderRadius: 12,
-                border: "1px solid #bbb",
-                background: "#f6f6f6",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        </section>
+    <AppButton
+      type="button"
+      className="no-print"
+      variant="danger"
+      size="md"
+      onClick={handleClearForm}
+    >
+      Clear form
+    </AppButton>
+
+    <AppButton
+      type="button"
+      className="no-print"
+      variant="secondary"
+      size="md"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof onLogout === "function") {
+          onLogout();
+        } else {
+          try {
+            localStorage.removeItem("seenUser");
+          } catch {}
+          window.location.href = "/";
+        }
+      }}
+    >
+      Logout
+    </AppButton>
+  </div>
+</section>
+
 
         {/* Floating Section Nav */}
         <div

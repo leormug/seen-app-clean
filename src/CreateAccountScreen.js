@@ -1,5 +1,6 @@
 // src/CreateAccountScreen.js
 import React, { useState } from "react";
+import AppButton from "./components/AppButton"; // path is correct if this file is directly in src/
 
 const USER_STORAGE_KEY = "auth_users_v1";
 
@@ -118,24 +119,10 @@ export default function CreateAccountScreen({ onCreated }) {
           </div>
 
           <div className="welcome-actions" style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn primary-btn"
-              onClick={handleCreate}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                borderRadius: "6px",
-                border: "1px solid #2563eb",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                fontSize: "15px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+            {/* call handleCreate, not handleSave */}
+            <AppButton variant="primary" onClick={handleCreate}>
               Create account
-            </button>
+            </AppButton>
           </div>
 
           <div style={{ textAlign: "center", marginTop: 12 }}>

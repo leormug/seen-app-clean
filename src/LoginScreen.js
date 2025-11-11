@@ -1,5 +1,6 @@
 // src/LoginScreen.js
 import React, { useState } from "react";
+import AppButton from "./components/AppButton";
 
 const USER_STORAGE_KEY = "auth_users_v1";
 
@@ -127,26 +128,11 @@ export default function LoginScreen({ onLoggedIn, onGoToCreate }) {
             </label>
           </div>
 
-          <div className="welcome-actions" style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn primary-btn"
-              onClick={handleLogin}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                borderRadius: "6px",
-                border: "1px solid #2563eb",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                fontSize: "15px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Log in
-            </button>
-          </div>
+         <div className="welcome-actions" style={{ marginTop: 16 }}>
+  <AppButton variant="primary" onClick={handleLogin}>
+    Log in
+  </AppButton>
+</div>
 
           <div style={{ textAlign: "center", marginTop: 12 }}>
             <span
