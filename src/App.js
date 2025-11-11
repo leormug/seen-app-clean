@@ -1,172 +1,277 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
+import WelcomeScreen from "./WelcomeScreen";
 import CardLayoutView from "./CardLayoutView";
-import LoginGate from "./LoginGate";
-import ErrorBoundary from "./ErrorBoundary";
-import PrintSummary from "./PrintSummary";
 
-// load saved data
-function loadSavedData() {
-  try {
-    const raw = localStorage.getItem("patientSummary_v1");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-// demo defaults (same as before)
-const patientDefaults = {
-  name: "Jane Doe",
-  dob: "04/21/1984",
-  allergies: [{ item: "Sulfa drugs", reaction: "Hives, shortness of breath" }],
-  hospitalizations: [
-    {
-      why: "Severe dehydration and acute glucose crisis (diabetes)",
-      when: "March 2012",
-    },
-  ],
-  diagnoses: [
-    {
-      name: "ME/CFS",
-      by: "Dr. L. Patel, Neurology",
-      date: "June 2008",
-      status: "Confirmed",
-    },
-  ],
-  procedures: [
-    {
-      name: "Tilt table test",
-      date: "January 2014",
-      notes:
-        "Used to diagnose dysautonomia, showed abnormal heart rate response",
-    },
-  ],
-  treatments: [
-    {
-      name: "Graded exercise therapy",
-      timeframe: "2015–2017",
-      effectiveness: "Ineffective, triggered flare-ups",
-      sideEffects: "Worsened fatigue, muscle pain",
-    },
-  ],
-  testsImaging: [
-    {
-      test: "Echocardiogram",
-      finding: "Normal structure and function",
-      date: "January 2014",
-      impact: "Helped rule out cardiac cause of dizziness",
-    },
-  ],
-  functionalImpact:
-    "I am mostly bedridden and depend on others for basic tasks like meals, bathing, and transportation...",
-  doctors: [
-    {
-      name: "Dr. L. Patel",
-      specialty: "Neurology",
-      contact: "(555) 555-1200",
-    },
-  ],
-};
-
-const visitDefaults = {
-  provider: "Dr. Taylor",
-  lastUpdated: "",
-  symptoms:
-    "In 2006, I experienced a severe case of Epstein-Barr virus that marked the beginning...",
-  problemsTodayText:
-    "Extreme fatigue, muscle weakness, dizziness, cognitive fog, shortness of breath, blood sugar instability",
-  problemsTodayList: [
-    "Extreme fatigue",
-    "Muscle weakness",
-    "Dizziness",
-    "Cognitive fog",
-    "Shortness of breath",
-    "Blood sugar instability",
-  ],
-  meds: [
-    { name: "Metformin", dose: "500 mg", freq: "Twice daily" },
-    { name: "Midodrine", dose: "10 mg", freq: "Morning only" },
-    { name: "Gabapentin", dose: "300 mg", freq: "At bedtime" },
-  ],
-  notes: "",
-};
-
-export default function App() {
-  const saved = loadSavedData();
-
-  // declare all state before using it
-  const [patientPermanent, setPatientPermanent] = useState(
-    saved?.patientPermanent || {
-      name: "",
-      dob: "",
-      mrn: "",
-      allergies: [{ item: "", reaction: "" }],
-      doctors: [{ name: "", specialty: "", contact: "" }],
-      hospitalizations: [{ why: "", when: "" }],
-      diagnoses: [{ name: "", by: "", date: "", status: "suspected" }],
-      procedures: [{ name: "", date: "", notes: "" }],
-      treatments: [
-        { name: "", timeframe: "", effectiveness: "", sideEffects: "" },
-      ],
-      testsImaging: [{ test: "", finding: "", date: "" }],
-      functionalImpact: "",
-    }
-  );
-
-  const [visitData, setVisitData] = useState(
-    saved?.visitData || {
-      provider: "",
-      lastUpdated: new Date().toISOString().slice(0, 10),
-      symptoms: "",
-      problemsTodayText: "",
-      problemsTodayList: [],
-      meds: [{ name: "", dose: "", freq: "" }],
-      notes: "",
-    }
-  );
-
-  // dynamic title
-  useEffect(() => {
-    const name = patientPermanent?.name?.trim();
-    document.title = name ? `SEEN: ${name}` : "SEEN";
-  }, [patientPermanent?.name]);
-
-  const mergeVisitData = (patch) => {
-    setVisitData((prev) => ({ ...prev, ...(patch || {}) }));
-  };
-
-  // auto-save
-  useEffect(() => {
-    try {
-      const payload = { patientPermanent, visitData };
-      localStorage.setItem("patientSummary_v1", JSON.stringify(payload));
-    } catch {}
-  }, [patientPermanent, visitData]);
+/** ------------ LOGIN SCREEN ------------ */
+function LoginScreen({ onLogin, onShowSignup }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
-    <div>
-      <LoginGate>
-        <ErrorBoundary>
-          <div className="app-screen-root">
-            <CardLayoutView
-              patientPermanent={patientPermanent}
-              setPatientPermanent={setPatientPermanent}
-              visitData={visitData}
-              mergeVisitData={mergeVisitData}
-              patientDefaults={patientDefaults}
-              visitDefaults={visitDefaults}
-            />
+    <div className="app-shell">
+      <main className="welcome-main">
+        <div className="login-card">
+          <div className="login-heading">Log in</div>
+          <div className="login-subheading">Enter your details to continue.</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <label style={{ fontSize: 13, color: "#111" }}>
+              <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 13 }}>
+                Email
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 6,
+                  border: "1px solid #bbb",
+                  fontSize: 14,
+                }}
+              />
+            </label>
+
+            <label style={{ fontSize: 13, color: "#111" }}>
+              <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 13 }}>
+                Password
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 6,
+                  border: "1px solid #bbb",
+                  fontSize: 14,
+                }}
+              />
+            </label>
           </div>
 
-          <div className="app-print-root">
-            <PrintSummary
-              patientPermanent={patientPermanent}
-              visitData={visitData}
-            />
+          <div className="welcome-actions" style={{ marginTop: 16 }}>
+            <button
+              type="button"
+              className="btn primary-btn"
+              onClick={() => {
+                // real auth can go here later; for now just hand off
+                onLogin();
+              }}
+            >
+              Log in
+            </button>
           </div>
-        </ErrorBoundary>
-      </LoginGate>
+
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: 13,
+              color: "#2563eb",
+              marginTop: 10,
+              cursor: "pointer",
+            }}
+            onClick={onShowSignup}
+          >
+            Create new account
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
+
+/** ------------ SIGNUP SCREEN ------------ */
+function SignupScreen({ onSignupComplete, onBackToLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  return (
+    <div className="app-shell">
+      <main className="welcome-main">
+        <div className="login-card">
+          <div className="login-heading">Create account</div>
+          <div className="login-subheading">Fill in details to register.</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <label style={{ fontSize: 13 }}>
+              <div style={{ fontWeight: 500, marginBottom: 4 }}>Email</div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 6,
+                  border: "1px solid #bbb",
+                  fontSize: 14,
+                }}
+              />
+            </label>
+
+            <label style={{ fontSize: 13 }}>
+              <div style={{ fontWeight: 500, marginBottom: 4 }}>Password</div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 6,
+                  border: "1px solid #bbb",
+                  fontSize: 14,
+                }}
+              />
+            </label>
+
+            <label style={{ fontSize: 13 }}>
+              <div style={{ fontWeight: 500, marginBottom: 4 }}>
+                Confirm password
+              </div>
+              <input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 6,
+                  border: "1px solid #bbb",
+                  fontSize: 14,
+                }}
+              />
+            </label>
+          </div>
+
+          <div className="welcome-actions" style={{ marginTop: 16 }}>
+            <button
+              type="button"
+              className="btn primary-btn"
+              onClick={() => {
+                // later: validate and call API; for now just treat as logged in
+                onSignupComplete();
+              }}
+            >
+              Sign up
+            </button>
+          </div>
+
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: 13,
+              color: "#2563eb",
+              marginTop: 10,
+              cursor: "pointer",
+            }}
+            onClick={onBackToLogin}
+          >
+            Back to log in
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/** ------------ MAIN APP ------------ */
+
+function getInitialScreen() {
+  // "welcome" | "login" | "main"
+  if (typeof window === "undefined") return "welcome";
+  try {
+    const hasSeenWelcome = localStorage.getItem("hasSeenWelcome") === "yes";
+    const isLoggedIn = !!localStorage.getItem("seenUser");
+    if (!hasSeenWelcome) return "welcome";
+    return isLoggedIn ? "main" : "login";
+  } catch {
+    return "welcome";
+  }
+}
+
+function App() {
+  const [screen, setScreen] = useState(getInitialScreen);
+  const [currentPatientName, setCurrentPatientName] = useState("");
+
+  // tab title
+  useEffect(() => {
+    const name = (currentPatientName || "").trim();
+    document.title = name ? `SEEN: ${name}` : "SEEN";
+  }, [currentPatientName]);
+
+  // from welcome
+  const handleWelcomeStart = () => {
+    try {
+      localStorage.setItem("hasSeenWelcome", "yes");
+    } catch {}
+    const loggedIn =
+      typeof window !== "undefined" &&
+      !!localStorage.getItem("seenUser");
+    setScreen(loggedIn ? "main" : "login");
+  };
+
+  // login → main
+  const handleLoginSuccess = () => {
+    try {
+      localStorage.setItem("seenUser", "active");
+    } catch {}
+    setScreen("main");
+  };
+
+  // signup → main
+  const handleSignupComplete = () => {
+    try {
+      localStorage.setItem("seenUser", "active");
+      localStorage.setItem("hasSeenWelcome", "yes");
+    } catch {}
+    setScreen("main");
+  };
+
+  // from app → login (not welcome)
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("seenUser");
+    } catch {}
+    setCurrentPatientName("");
+    setScreen("login");
+  };
+
+  // routing between screens
+  if (screen === "welcome") {
+    return <WelcomeScreen onStart={handleWelcomeStart} />;
+  }
+
+  if (screen === "login") {
+    return (
+      <LoginScreen
+        onLogin={handleLoginSuccess}
+        onShowSignup={() => setScreen("signup")}
+      />
+    );
+  }
+
+  if (screen === "signup") {
+    return (
+      <SignupScreen
+        onSignupComplete={handleSignupComplete}
+        onBackToLogin={() => setScreen("login")}
+      />
+    );
+  }
+
+  // main app
+  return (
+    <CardLayoutView
+      onPatientNameChange={setCurrentPatientName}
+      onLogout={handleLogout}
+    />
+  );
+}
+
+export default App;
