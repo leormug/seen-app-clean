@@ -179,6 +179,22 @@ export default function LoginScreen({ onLoggedIn, onGoToCreate }) {
           Create a new account
         </button>
       </div>
+      {/* Create Account link */}
+<div
+  style={{
+    textAlign: "center",
+    fontSize: 13,
+    color: "#2563eb",
+    marginTop: 12,
+    cursor: "pointer",
+  }}
+  onClick={() => setScreen("signup")}
+  
+>
+  Create account
+</div>
+
     </div>
+    
   );
 }

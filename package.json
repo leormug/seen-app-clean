@@ -11,8 +11,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1"
-    
-
   },
   "devDependencies": {
     "assert": "^2.1.0",
@@ -35,7 +33,7 @@
     "dist:win": "npm run build && electron-builder --win"
   },
   "build": {
-    "appId": "com.seen.mymedicalapp",
+    "appId": "com.mycompany.seen",
     "productName": "SEEN",
     "files": [
       "build/**/*",
@@ -47,12 +45,16 @@
       "output": "dist"
     },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "category": "public.app-category.medical",
       "icon": "assets/icon.icns"
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "artifactName": "${productName}-Setup-${version}.exe",
       "icon": "assets/icon.ico"
     }

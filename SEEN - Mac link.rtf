@@ -1,8 +1,297 @@
 {\rtf1\ansi\ansicpg1252\cocoartf2822
 \cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
-{\colortbl;\red255\green255\blue255;\red41\green199\blue185;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\cssrgb\c15686\c81176\c77647;\csgray\c0\c90000;}
+{\colortbl;\red255\green255\blue255;\red15\green112\blue1;\red255\green255\blue255;\red0\green0\blue0;
+\red157\green0\blue210;\red0\green0\blue109;\red144\green1\blue18;\red0\green0\blue255;\red101\green76\blue29;
+\red11\green90\blue180;\red107\green0\blue1;\red220\green0\blue5;\red19\green118\blue70;\red32\green108\blue135;
+}
+{\*\expandedcolortbl;;\cssrgb\c0\c50196\c0;\cssrgb\c100000\c100000\c100000;\cssrgb\c0\c0\c0;
+\cssrgb\c68627\c0\c85882;\cssrgb\c0\c6275\c50196;\cssrgb\c63922\c8235\c8235;\cssrgb\c0\c0\c100000;\cssrgb\c47451\c36863\c14902;
+\cssrgb\c0\c43922\c75686;\cssrgb\c50196\c0\c0;\cssrgb\c89804\c0\c0;\cssrgb\c3529\c52549\c34510;\cssrgb\c14902\c49804\c60000;
+}
 \margl1440\margr1440\vieww12240\viewh15840\viewkind1
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\deftab720
+\pard\pardeftab720\partightenfactor0
 
-\f0\fs36 \cf2 \cb3 \CocoaLigature0 git merge edit-08}
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 // src/App.js\cf0 \cb1 \strokec4 \
+\cf5 \cb3 \strokec5 import\cf0 \strokec4  \cf6 \strokec6 React\cf0 \strokec4 , \{ \cf6 \strokec6 useState\cf0 \strokec4 , \cf6 \strokec6 useEffect\cf0 \strokec4  \} \cf5 \strokec5 from\cf0 \strokec4  \cf7 \strokec7 "react"\cf0 \strokec4 ;\cb1 \
+\cf5 \cb3 \strokec5 import\cf0 \strokec4  \cf6 \strokec6 WelcomeScreen\cf0 \strokec4  \cf5 \strokec5 from\cf0 \strokec4  \cf7 \strokec7 "./WelcomeScreen"\cf0 \strokec4 ;\cb1 \
+\cf5 \cb3 \strokec5 import\cf0 \strokec4  \cf6 \strokec6 CardLayoutView\cf0 \strokec4  \cf5 \strokec5 from\cf0 \strokec4  \cf7 \strokec7 "./CardLayoutView"\cf0 \strokec4 ;\cb1 \
+\cf2 \cb3 \strokec2 /* temporary welcome page */\cf0 \cb1 \strokec4 \
+\cf5 \cb3 \strokec5 import\cf0 \strokec4  \cf6 \strokec6 WelcomePageV2\cf0 \strokec4  \cf5 \strokec5 from\cf0 \strokec4  \cf7 \strokec7 "./WelcomePageV2"\cf0 \strokec4 ;\cb1 \
+\
+\cf2 \cb3 \strokec2 /* ------------ LOGIN SCREEN ------------ */\cf0 \cb1 \strokec4 \
+\cf8 \cb3 \strokec8 function\cf0 \strokec4  \cf9 \strokec9 LoginScreen\cf0 \strokec4 (\{ \cf6 \strokec6 onLogin\cf0 \strokec4 , \cf6 \strokec6 onShowSignup\cf0 \strokec4  \}) \{\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 email\cf0 \strokec4 , \cf9 \strokec9 setEmail\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 password\cf0 \strokec4 , \cf9 \strokec9 setPassword\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\
+\cb3   \cf5 \strokec5 return\cf0 \strokec4  (\cb1 \
+\cb3     \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "app-shell"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 <main\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "welcome-main"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3         \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-card"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-heading"\cf11 \strokec11 >\cf0 \strokec4 Log in\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-subheading"\cf11 \strokec11 >\cf0 \strokec4 Enter your details to continue.\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 display:\cf0 \strokec4  \cf7 \strokec7 "flex"\cf0 \strokec4 , \cf6 \strokec6 flexDirection:\cf0 \strokec4  \cf7 \strokec7 "column"\cf0 \strokec4 , \cf6 \strokec6 gap:\cf0 \strokec4  \cf13 \cb3 \strokec13 10\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 <label\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4 , \cf6 \strokec6 color:\cf0 \strokec4  \cf7 \strokec7 "#111"\cf0 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontWeight:\cf0 \strokec4  \cf13 \cb3 \strokec13 500\cf0 \cb3 \strokec4 , \cf6 \strokec6 marginBottom:\cf0 \strokec4  \cf13 \cb3 \strokec13 4\cf0 \cb3 \strokec4 , \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3                 Email\cb1 \
+\cb3               \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <input\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "email"\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 value\cf0 \strokec4 =\cf8 \strokec8 \{\cf10 \strokec10 email\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 onChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 ) \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setEmail\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 .\cf6 \strokec6 target\cf0 \strokec4 .\cf6 \strokec6 value\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3                   \cf6 \strokec6 width:\cf0 \strokec4  \cf7 \strokec7 "100%"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 padding:\cf0 \strokec4  \cf7 \strokec7 "10px 12px"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 borderRadius:\cf0 \strokec4  \cf13 \cb3 \strokec13 6\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 border:\cf0 \strokec4  \cf7 \strokec7 "1px solid #bbb"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 14\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                 \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 </label>\cf0 \cb1 \strokec4 \
+\
+\cb3             \cf11 \strokec11 <label\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4 , \cf6 \strokec6 color:\cf0 \strokec4  \cf7 \strokec7 "#111"\cf0 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontWeight:\cf0 \strokec4  \cf13 \cb3 \strokec13 500\cf0 \cb3 \strokec4 , \cf6 \strokec6 marginBottom:\cf0 \strokec4  \cf13 \cb3 \strokec13 4\cf0 \cb3 \strokec4 , \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3                 Password\cb1 \
+\cb3               \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <input\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "password"\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 value\cf0 \strokec4 =\cf8 \strokec8 \{\cf10 \strokec10 password\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 onChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 ) \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setPassword\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 .\cf6 \strokec6 target\cf0 \strokec4 .\cf6 \strokec6 value\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3                   \cf6 \strokec6 width:\cf0 \strokec4  \cf7 \strokec7 "100%"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 padding:\cf0 \strokec4  \cf7 \strokec7 "10px 12px"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 borderRadius:\cf0 \strokec4  \cf13 \cb3 \strokec13 6\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 border:\cf0 \strokec4  \cf7 \strokec7 "1px solid #bbb"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 14\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                 \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 </label>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "welcome-actions"\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 marginTop:\cf0 \strokec4  \cf13 \cb3 \strokec13 16\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 <button\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "button"\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "btn primary-btn"\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 onClick\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3                 \cf9 \strokec9 onLogin\cf0 \strokec4 ();\cb1 \
+\cb3               \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               Log in\cb1 \
+\cb3             \cf11 \strokec11 </button>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \cb1 \strokec4 \
+\cb3             \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3               \cf6 \strokec6 textAlign:\cf0 \strokec4  \cf7 \strokec7 "center"\cf0 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 color:\cf0 \strokec4  \cf7 \strokec7 "#2563eb"\cf0 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 marginTop:\cf0 \strokec4  \cf13 \cb3 \strokec13 10\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 cursor:\cf0 \strokec4  \cf7 \strokec7 "pointer"\cf0 \strokec4 ,\cb1 \
+\cb3             \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3             \cf12 \strokec12 onClick\cf0 \strokec4 =\cf8 \strokec8 \{\cf6 \strokec6 onShowSignup\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             Create new account\cb1 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3         \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 </main>\cf0 \cb1 \strokec4 \
+\cb3     \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3   );\cb1 \
+\cb3 \}\cb1 \
+\
+\cf2 \cb3 \strokec2 /** ------------ SIGNUP SCREEN ------------ */\cf0 \cb1 \strokec4 \
+\cf8 \cb3 \strokec8 function\cf0 \strokec4  \cf9 \strokec9 SignupScreen\cf0 \strokec4 (\{ \cf6 \strokec6 onSignupComplete\cf0 \strokec4 , \cf6 \strokec6 onBackToLogin\cf0 \strokec4  \}) \{\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 email\cf0 \strokec4 , \cf9 \strokec9 setEmail\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 password\cf0 \strokec4 , \cf9 \strokec9 setPassword\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 confirm\cf0 \strokec4 , \cf9 \strokec9 setConfirm\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\
+\cb3   \cf5 \strokec5 return\cf0 \strokec4  (\cb1 \
+\cb3     \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "app-shell"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 <main\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "welcome-main"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3         \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-card"\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-heading"\cf11 \strokec11 >\cf0 \strokec4 Create account\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "login-subheading"\cf11 \strokec11 >\cf0 \strokec4 Fill in details to register.\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 display:\cf0 \strokec4  \cf7 \strokec7 "flex"\cf0 \strokec4 , \cf6 \strokec6 flexDirection:\cf0 \strokec4  \cf7 \strokec7 "column"\cf0 \strokec4 , \cf6 \strokec6 gap:\cf0 \strokec4  \cf13 \cb3 \strokec13 10\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 <label\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontWeight:\cf0 \strokec4  \cf13 \cb3 \strokec13 500\cf0 \cb3 \strokec4 , \cf6 \strokec6 marginBottom:\cf0 \strokec4  \cf13 \cb3 \strokec13 4\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \strokec4 Email\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <input\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "email"\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 value\cf0 \strokec4 =\cf8 \strokec8 \{\cf6 \strokec6 email\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 onChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 ) \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setEmail\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 .\cf6 \strokec6 target\cf0 \strokec4 .\cf6 \strokec6 value\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3                   \cf6 \strokec6 width:\cf0 \strokec4  \cf7 \strokec7 "100%"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 padding:\cf0 \strokec4  \cf7 \strokec7 "10px 12px"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 borderRadius:\cf0 \strokec4  \cf13 \cb3 \strokec13 6\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 border:\cf0 \strokec4  \cf7 \strokec7 "1px solid #bbb"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 14\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                 \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 </label>\cf0 \cb1 \strokec4 \
+\
+\cb3             \cf11 \strokec11 <label\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontWeight:\cf0 \strokec4  \cf13 \cb3 \strokec13 500\cf0 \cb3 \strokec4 , \cf6 \strokec6 marginBottom:\cf0 \strokec4  \cf13 \cb3 \strokec13 4\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \strokec4 Password\cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <input\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "password"\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 value\cf0 \strokec4 =\cf8 \strokec8 \{\cf10 \strokec10 password\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 onChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 ) \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setPassword\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 .\cf6 \strokec6 target\cf0 \strokec4 .\cf6 \strokec6 value\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3                   \cf6 \strokec6 width:\cf0 \strokec4  \cf7 \strokec7 "100%"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 padding:\cf0 \strokec4  \cf7 \strokec7 "10px 12px"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 borderRadius:\cf0 \strokec4  \cf13 \cb3 \strokec13 6\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 border:\cf0 \strokec4  \cf7 \strokec7 "1px solid #bbb"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 14\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                 \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 </label>\cf0 \cb1 \strokec4 \
+\
+\cb3             \cf11 \strokec11 <label\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 fontWeight:\cf0 \strokec4  \cf13 \cb3 \strokec13 500\cf0 \cb3 \strokec4 , \cf6 \strokec6 marginBottom:\cf0 \strokec4  \cf13 \cb3 \strokec13 4\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3                 Confirm password\cb1 \
+\cb3               \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 <input\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "password"\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 value\cf0 \strokec4 =\cf8 \strokec8 \{\cf10 \strokec10 confirm\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 onChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 ) \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setConfirm\cf0 \strokec4 (\cf6 \strokec6 e\cf0 \strokec4 .\cf6 \strokec6 target\cf0 \strokec4 .\cf6 \strokec6 value\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3                 \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3                   \cf6 \strokec6 width:\cf0 \strokec4  \cf7 \strokec7 "100%"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 padding:\cf0 \strokec4  \cf7 \strokec7 "10px 12px"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 borderRadius:\cf0 \strokec4  \cf13 \cb3 \strokec13 6\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 border:\cf0 \strokec4  \cf7 \strokec7 "1px solid #bbb"\cf0 \strokec4 ,\cb1 \
+\cb3                   \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 14\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3                 \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3               \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 </label>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \strokec4  \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "welcome-actions"\cf0 \strokec4  \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{ \cf6 \strokec6 marginTop:\cf0 \strokec4  \cf13 \cb3 \strokec13 16\cf0 \cb3 \strokec4  \}\cf8 \strokec8 \}\cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 <button\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 type\cf0 \strokec4 =\cf7 \strokec7 "button"\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 className\cf0 \strokec4 =\cf7 \strokec7 "btn primary-btn"\cf0 \cb1 \strokec4 \
+\cb3               \cf12 \strokec12 onClick\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3                 \cf9 \strokec9 onSignupComplete\cf0 \strokec4 ();\cb1 \
+\cb3               \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3             \cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3               Sign up\cb1 \
+\cb3             \cf11 \strokec11 </button>\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\
+\cb3           \cf11 \strokec11 <div\cf0 \cb1 \strokec4 \
+\cb3             \cf12 \strokec12 style\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 \{\cb1 \
+\cb3               \cf6 \strokec6 textAlign:\cf0 \strokec4  \cf7 \strokec7 "center"\cf0 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 fontSize:\cf0 \strokec4  \cf13 \cb3 \strokec13 13\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 color:\cf0 \strokec4  \cf7 \strokec7 "#2563eb"\cf0 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 marginTop:\cf0 \strokec4  \cf13 \cb3 \strokec13 10\cf0 \cb3 \strokec4 ,\cb1 \
+\cb3               \cf6 \strokec6 cursor:\cf0 \strokec4  \cf7 \strokec7 "pointer"\cf0 \strokec4 ,\cb1 \
+\cb3             \}\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3             \cf12 \strokec12 onClick\cf0 \strokec4 =\cf8 \strokec8 \{\cf6 \strokec6 onBackToLogin\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3           \cf11 \strokec11 >\cf0 \cb1 \strokec4 \
+\cb3             Back to log in\cb1 \
+\cb3           \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3         \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 </main>\cf0 \cb1 \strokec4 \
+\cb3     \cf11 \strokec11 </div>\cf0 \cb1 \strokec4 \
+\cb3   );\cb1 \
+\cb3 \}\cb1 \
+\
+\cf2 \cb3 \strokec2 /** ------------ MAIN APP LOGIC (renamed) ------------ */\cf0 \cb1 \strokec4 \
+\
+\cf8 \cb3 \strokec8 function\cf0 \strokec4  \cf9 \strokec9 getInitialScreen\cf0 \strokec4 () \{\cb1 \
+\cb3   \cf5 \strokec5 if\cf0 \strokec4  (\cf8 \strokec8 typeof\cf0 \strokec4  \cf6 \strokec6 window\cf0 \strokec4  === \cf7 \strokec7 "undefined"\cf0 \strokec4 ) \cf5 \strokec5 return\cf0 \strokec4  \cf7 \strokec7 "welcome"\cf0 \strokec4 ;\cb1 \
+\cb3   \cf5 \strokec5 try\cf0 \strokec4  \{\cb1 \
+\cb3     \cf8 \strokec8 const\cf0 \strokec4  \cf10 \strokec10 hasSeenWelcome\cf0 \strokec4  = \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 getItem\cf0 \strokec4 (\cf7 \strokec7 "hasSeenWelcome"\cf0 \strokec4 ) === \cf7 \strokec7 "yes"\cf0 \strokec4 ;\cb1 \
+\cb3     \cf8 \strokec8 const\cf0 \strokec4  \cf10 \strokec10 isLoggedIn\cf0 \strokec4  = !!\cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 getItem\cf0 \strokec4 (\cf7 \strokec7 "seenUser"\cf0 \strokec4 );\cb1 \
+\cb3     \cf5 \strokec5 if\cf0 \strokec4  (!\cf10 \strokec10 hasSeenWelcome\cf0 \strokec4 ) \cf5 \strokec5 return\cf0 \strokec4  \cf7 \strokec7 "welcome"\cf0 \strokec4 ;\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  \cf10 \strokec10 isLoggedIn\cf0 \strokec4  ? \cf7 \strokec7 "main"\cf0 \strokec4  : \cf7 \strokec7 "login"\cf0 \strokec4 ;\cb1 \
+\cb3   \} \cf5 \strokec5 catch\cf0 \strokec4  \{\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  \cf7 \strokec7 "welcome"\cf0 \strokec4 ;\cb1 \
+\cb3   \}\cb1 \
+\cb3 \}\cb1 \
+\
+\cf8 \cb3 \strokec8 function\cf0 \strokec4  \cf9 \strokec9 RootApp\cf0 \strokec4 () \{\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 screen\cf0 \strokec4 , \cf10 \strokec10 setScreen\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf6 \strokec6 getInitialScreen\cf0 \strokec4 );\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  [\cf10 \strokec10 currentPatientName\cf0 \strokec4 , \cf10 \strokec10 setCurrentPatientName\cf0 \strokec4 ] = \cf9 \strokec9 useState\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\
+\cb3   \cf9 \strokec9 useEffect\cf0 \strokec4 (() \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3     \cf8 \strokec8 const\cf0 \strokec4  \cf10 \strokec10 name\cf0 \strokec4  = (\cf6 \strokec6 currentPatientName\cf0 \strokec4  || \cf7 \strokec7 ""\cf0 \strokec4 ).\cf9 \strokec9 trim\cf0 \strokec4 ();\cb1 \
+\cb3     \cf6 \strokec6 document\cf0 \strokec4 .\cf6 \strokec6 title\cf0 \strokec4  = \cf6 \strokec6 name\cf0 \strokec4  ? \cf7 \strokec7 `SEEN: \cf8 \strokec8 $\{\cf6 \strokec6 name\cf8 \strokec8 \}\cf7 \strokec7 `\cf0 \strokec4  : \cf7 \strokec7 "SEEN"\cf0 \strokec4 ;\cb1 \
+\cb3   \}, [\cf6 \strokec6 currentPatientName\cf0 \strokec4 ]);\cb1 \
+\
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  \cf9 \strokec9 handleWelcomeStart\cf0 \strokec4  = () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3     \cf5 \strokec5 try\cf0 \strokec4  \{\cb1 \
+\cb3       \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 setItem\cf0 \strokec4 (\cf7 \strokec7 "hasSeenWelcome"\cf0 \strokec4 , \cf7 \strokec7 "yes"\cf0 \strokec4 );\cb1 \
+\cb3     \} \cf5 \strokec5 catch\cf0 \strokec4  \{\}\cb1 \
+\cb3     \cf8 \strokec8 const\cf0 \strokec4  \cf10 \strokec10 loggedIn\cf0 \strokec4  =\cb1 \
+\cb3       \cf8 \strokec8 typeof\cf0 \strokec4  \cf6 \strokec6 window\cf0 \strokec4  !== \cf7 \strokec7 "undefined"\cf0 \strokec4  && !!\cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 getItem\cf0 \strokec4 (\cf7 \strokec7 "seenUser"\cf0 \strokec4 );\cb1 \
+\cb3     \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf6 \strokec6 loggedIn\cf0 \strokec4  ? \cf7 \strokec7 "main"\cf0 \strokec4  : \cf7 \strokec7 "login"\cf0 \strokec4 );\cb1 \
+\cb3   \};\cb1 \
+\
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  \cf9 \strokec9 handleLoginSuccess\cf0 \strokec4  = () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3     \cf5 \strokec5 try\cf0 \strokec4  \{\cb1 \
+\cb3       \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 setItem\cf0 \strokec4 (\cf7 \strokec7 "seenUser"\cf0 \strokec4 , \cf7 \strokec7 "active"\cf0 \strokec4 );\cb1 \
+\cb3     \} \cf5 \strokec5 catch\cf0 \strokec4  \{\}\cb1 \
+\cb3     \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf7 \strokec7 "main"\cf0 \strokec4 );\cb1 \
+\cb3   \};\cb1 \
+\
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  \cf9 \strokec9 handleSignupComplete\cf0 \strokec4  = () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3     \cf5 \strokec5 try\cf0 \strokec4  \{\cb1 \
+\cb3       \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 setItem\cf0 \strokec4 (\cf7 \strokec7 "seenUser"\cf0 \strokec4 , \cf7 \strokec7 "active"\cf0 \strokec4 );\cb1 \
+\cb3       \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 setItem\cf0 \strokec4 (\cf7 \strokec7 "hasSeenWelcome"\cf0 \strokec4 , \cf7 \strokec7 "yes"\cf0 \strokec4 );\cb1 \
+\cb3     \} \cf5 \strokec5 catch\cf0 \strokec4  \{\}\cb1 \
+\cb3     \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf7 \strokec7 "main"\cf0 \strokec4 );\cb1 \
+\cb3   \};\cb1 \
+\
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  \cf9 \strokec9 handleLogout\cf0 \strokec4  = () \cf8 \strokec8 =>\cf0 \strokec4  \{\cb1 \
+\cb3     \cf5 \strokec5 try\cf0 \strokec4  \{\cb1 \
+\cb3       \cf6 \strokec6 localStorage\cf0 \strokec4 .\cf9 \strokec9 removeItem\cf0 \strokec4 (\cf7 \strokec7 "seenUser"\cf0 \strokec4 );\cb1 \
+\cb3     \} \cf5 \strokec5 catch\cf0 \strokec4  \{\}\cb1 \
+\cb3     \cf9 \strokec9 setCurrentPatientName\cf0 \strokec4 (\cf7 \strokec7 ""\cf0 \strokec4 );\cb1 \
+\cb3     \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf7 \strokec7 "login"\cf0 \strokec4 );\cb1 \
+\cb3   \};\cb1 \
+\
+\cb3   \cf5 \strokec5 if\cf0 \strokec4  (\cf10 \strokec10 screen\cf0 \strokec4  === \cf7 \strokec7 "welcome"\cf0 \strokec4 ) \{\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  \cf11 \strokec11 <\cf14 \strokec14 WelcomeScreen\cf0 \strokec4  \cf12 \strokec12 onStart\cf0 \strokec4 =\cf8 \strokec8 \{\cf9 \strokec9 handleWelcomeStart\cf8 \strokec8 \}\cf0 \strokec4  \cf11 \strokec11 />\cf0 \strokec4 ;\cb1 \
+\cb3   \}\cb1 \
+\
+\cb3   \cf5 \strokec5 if\cf0 \strokec4  (\cf10 \strokec10 screen\cf0 \strokec4  === \cf7 \strokec7 "login"\cf0 \strokec4 ) \{\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  (\cb1 \
+\cb3       \cf11 \strokec11 <\cf14 \strokec14 LoginScreen\cf0 \cb1 \strokec4 \
+\cb3         \cf12 \strokec12 onLogin\cf0 \strokec4 =\cf8 \strokec8 \{\cf9 \strokec9 handleLoginSuccess\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3         \cf12 \strokec12 onShowSignup\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 () \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf7 \strokec7 "signup"\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3     );\cb1 \
+\cb3   \}\cb1 \
+\
+\cb3   \cf5 \strokec5 if\cf0 \strokec4  (\cf10 \strokec10 screen\cf0 \strokec4  === \cf7 \strokec7 "signup"\cf0 \strokec4 ) \{\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  (\cb1 \
+\cb3       \cf11 \strokec11 <\cf14 \strokec14 SignupScreen\cf0 \cb1 \strokec4 \
+\cb3         \cf12 \strokec12 onSignupComplete\cf0 \strokec4 =\cf8 \strokec8 \{\cf9 \strokec9 handleSignupComplete\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3         \cf12 \strokec12 onBackToLogin\cf0 \strokec4 =\cf8 \strokec8 \{\cf0 \strokec4 () \cf8 \strokec8 =>\cf0 \strokec4  \cf9 \strokec9 setScreen\cf0 \strokec4 (\cf7 \strokec7 "login"\cf0 \strokec4 )\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3       \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3     );\cb1 \
+\cb3   \}\cb1 \
+\
+\cb3   \cf5 \strokec5 return\cf0 \strokec4  (\cb1 \
+\cb3     \cf11 \strokec11 <\cf14 \strokec14 CardLayoutView\cf0 \cb1 \strokec4 \
+\cb3       \cf12 \strokec12 onPatientNameChange\cf0 \strokec4 =\cf8 \strokec8 \{\cf9 \strokec9 setCurrentPatientName\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3       \cf12 \strokec12 onLogout\cf0 \strokec4 =\cf8 \strokec8 \{\cf9 \strokec9 handleLogout\cf8 \strokec8 \}\cf0 \cb1 \strokec4 \
+\cb3     \cf11 \strokec11 />\cf0 \cb1 \strokec4 \
+\cb3   );\cb1 \
+\cb3 \}\cb1 \
+\
+\cf2 \cb3 \strokec2 /** ------------ APP ENTRY POINT WITH WELCOME V2 OVERRIDE ------------ */\cf0 \cb1 \strokec4 \
+\
+\cf8 \cb3 \strokec8 function\cf0 \strokec4  \cf9 \strokec9 App\cf0 \strokec4 () \{\cb1 \
+\cb3   \cf8 \strokec8 const\cf0 \strokec4  \cf10 \strokec10 USE_WELCOME_V2\cf0 \strokec4  = \cf8 \strokec8 true\cf0 \strokec4 ;\cb1 \
+\
+\cb3   \cf5 \strokec5 if\cf0 \strokec4  (\cf10 \strokec10 USE_WELCOME_V2\cf0 \strokec4 ) \{\cb1 \
+\cb3     \cf5 \strokec5 return\cf0 \strokec4  \cf11 \strokec11 <\cf14 \strokec14 WelcomePageV2\cf0 \strokec4  \cf11 \strokec11 />\cf0 \strokec4 ;\cb1 \
+\cb3   \}\cb1 \
+\
+\cb3   \cf5 \strokec5 return\cf0 \strokec4  \cf11 \strokec11 <\cf14 \strokec14 RootApp\cf0 \strokec4  \cf11 \strokec11 />\cf0 \strokec4 ;\cb1 \
+\cb3 \}\cb1 \
+\
+\cf5 \cb3 \strokec5 export\cf0 \strokec4  \cf5 \strokec5 default\cf0 \strokec4  \cf9 \strokec9 App\cf0 \strokec4 ;\cb1 \
+\
+}

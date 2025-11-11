@@ -6,70 +6,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-// Fallback demo defaults for a brand-new user
-const PATIENT_DEFAULTS_FALLBACK = {
-  name: "Jane Doe",
-  dob: "04/21/1984",
-
-  diagnoses: [
-    {
-      name: "ME/CFS",
-      by: "Dr. L. Patel, Neurology",
-      date: "June 2008",
-      status: "confirmed",
-    },
-  ],
-
-  hospitalizations: [
-    {
-      why: "Severe dehydration and acute glucose crisis (diabetes)",
-      when: "March 2012",
-    },
-  ],
-
-  allergies: [
-    {
-      name: "Penicillin",
-      reaction: "Severe rash and swelling",
-      notes: "",
-    },
-  ],
-
-  procedures: [
-    {
-      name: "Tilt table test",
-      date: "January 2014",
-      notes:
-        "Used to diagnose dysautonomia, showed abnormal heart rate response",
-    },
-  ],
-
-  treatments: [
-    {
-      name: "Graded activity pacing",
-      start: "2015",
-      notes: "Helps avoid post-exertional crashes",
-    },
-  ],
-
-  tests: [
-    {
-      name: "Brain MRI",
-      date: "2016",
-      result: "No structural abnormalities",
-    },
-  ],
-
-  doctors: [
-    {
-      name: "Dr. L. Patel",
-      specialty: "Neurology",
-      location: "City General Hospital",
-    },
-  ],
-};
-
-
 /* ---------------------------
    SMALL HOOKS
 ----------------------------*/
@@ -378,6 +314,8 @@ function TextAreaDemo({
 const DEFAULT_PATIENT_DEFAULTS = {
   name: "Jane Doe",
   dob: "04/21/1984",
+  chronicProblemsText:
+    "ME/CFS, dysautonomia, and Type 2 diabetes causing long-term fatigue, weakness, dizziness, and limited mobility.",
   diagnoses: [
     {
       name: "ME/CFS",
@@ -461,16 +399,13 @@ export default function CardLayoutView({
 
   // local fallbacks
   const [localPatient, setLocalPatient] = useState(() => {
-  if (patientPermanent) return patientPermanent;
-  try {
-    const raw = localStorage.getItem("patientPermanent");
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  // when nothing is saved, start truly empty
-  return {};
-});
-
-
+    if (patientPermanent) return patientPermanent;
+    try {
+      const raw = localStorage.getItem("patientPermanent");
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  });
   useEffect(() => {
     if (typeof onPatientNameChange === "function") {
       const name = (localPatient?.name || "").trim();
@@ -535,11 +470,10 @@ export default function CardLayoutView({
     }
   }, []); // run once
 
-    const P_live = { ...(patientPermanent || localPatient || {}) };
-const V_live = hasParent ? { ...(visitData || {}) } : { ...(localVisit || {}) };
-const P_default = patientDefaults || DEFAULT_PATIENT_DEFAULTS;
-const V_default = visitDefaults || DEFAULT_VISIT_DEFAULTS;
-
+  const P_live = { ...(patientPermanent || localPatient || {}) };
+  const V_live = hasParent ? { ...(visitData || {}) } : { ...(localVisit || {}) };
+  const P_default = patientDefaults || DEFAULT_PATIENT_DEFAULTS;
+  const V_default = visitDefaults || DEFAULT_VISIT_DEFAULTS;
 
   // "first time" detection: no stored patient AND no stored visit
   const hasAnyPatientData =
@@ -713,70 +647,38 @@ const V_default = visitDefaults || DEFAULT_VISIT_DEFAULTS;
   }
 
   function ensureArrayField(field) {
-  const base = patientPermanent || localPatient || {};
-  const arr = base[field];
-
-  if (Array.isArray(arr) && arr.length > 0) return arr;
-
-  switch (field) {
-    case "diagnoses":
-      return [{ name: "", by: "", date: "", status: "" }];
-    case "hospitalizations":
-      return [{ why: "", when: "" }];
-    case "allergies":
-      return [{ item: "", reaction: "" }];
-    case "procedures":
-      return [{ name: "", date: "", notes: "" }];
-    case "treatments":
-      return [
-        {
-          name: "",
-          timeframe: "",
-          effectiveness: "",
-          sideEffects: "",
-        },
-      ];
-    case "testsImaging":
-      return [{ test: "", finding: "", date: "" }];
-    case "doctors":
-      return [{ name: "", specialty: "", contact: "" }];
-    default:
-      return [{}];
+    const base = patientPermanent || localPatient || {};
+    if (!Array.isArray(base[field])) {
+      const updated = { ...base, [field]: [] };
+      setP(updated);
+      return [];
+    }
+    return base[field];
   }
-}
 
-
-function updatePArray(field, idx, key, value) {
-  const arr = ensureArrayField(field).slice();
-  if (!arr[idx]) arr[idx] = {};
-  arr[idx] = { ...arr[idx], [key]: value };
-  const base = localPatient || {};
-  setLocalPatient({ ...base, [field]: arr });
-}
-
-function addPRow(field, template) {
-  const arr = ensureArrayField(field).slice();
-  arr.push(template);
-  const base = localPatient || {};
-  setLocalPatient({ ...base, [field]: arr });
-}
-
-function removePRow(field, idx, fallbackTemplate) {
-  const arr = ensureArrayField(field).slice();
-  arr.splice(idx, 1);
-  if (arr.length === 0) arr.push(fallbackTemplate);
-  const base = localPatient || {};
-  setLocalPatient({ ...base, [field]: arr });
-}
-
-
-function updatePArray(field, idx, key, value) {
+  function updatePArray(field, idx, key, value) {
     const arr = ensureArrayField(field).slice();
     if (!arr[idx]) arr[idx] = {};
     arr[idx] = { ...arr[idx], [key]: value };
     const base = patientPermanent || localPatient || {};
     setP({ ...base, [field]: arr });
   }
+
+  function addPRow(field, template) {
+    const arr = ensureArrayField(field).slice();
+    arr.push(template);
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: arr });
+  }
+
+  function removePRow(field, idx, fallbackTemplate) {
+    const arr = ensureArrayField(field).slice();
+    arr.splice(idx, 1);
+    if (arr.length === 0) arr.push(fallbackTemplate);
+    const base = patientPermanent || localPatient || {};
+    setP({ ...base, [field]: arr });
+  }
+
   // visit helpers
   function updateVisitArray(field, idx, key, value) {
     const base = hasParent ? visitData || {} : localVisit || {};
@@ -908,6 +810,7 @@ function updatePArray(field, idx, key, value) {
     const clearedPatient = {
       name: "",
       dob: "",
+      chronicProblemsText: "",
       functionalImpact: "",
       diagnoses: [{ name: "", by: "", date: "", status: "" }],
       hospitalizations: [{ why: "", when: "" }],
@@ -948,7 +851,7 @@ function updatePArray(field, idx, key, value) {
     }
   }
 
-   return (
+  return (
     <div
       className="page-wrap"
       style={{
@@ -965,10 +868,8 @@ function updatePArray(field, idx, key, value) {
         flexDirection: "column",
         boxSizing: "border-box",
         width: "100%",
-        overflowY: "auto",        // <-- added
       }}
     >
-
       {/* ============== SCREEN EDITOR VIEW ============== */}
       <div className="screen-only">
         {/* Title */}
@@ -1041,24 +942,113 @@ function updatePArray(field, idx, key, value) {
           </section>
         </div>
 
-       {/* Diagnoses */}
-<div ref={sectionRefs.current.diagnoses} data-section-id="diagnoses">
-  <section style={cardOuterStyle}>
-    <header style={headerRowStyle}>
-      <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
-    </header>
+        {/* Diagnoses */}
+        <div ref={sectionRefs.current.diagnoses} data-section-id="diagnoses">
+          <section style={cardOuterStyle}>
+            <header style={headerRowStyle}>
+              <h2 style={cardHeaderTitleStyle}>Diagnoses</h2>
+            </header>
 
-    {ensureArrayField("diagnoses").map((d, idx) => {
-      const dDefaults = (P_default.diagnoses || [])[idx] || {};
-      const statusVal = isNonEmptyString(d?.status) ? d.status : "";
+            {(Array.isArray(P_live.diagnoses) ? P_live.diagnoses : []).map(
+              (d, idx) => {
+                const dDefaults = (P_default.diagnoses || [])[idx] || {};
+                const statusVal = isNonEmptyString(d?.status)
+                  ? d.status
+                  : dDefaults.status || "";
 
-      return (
-        <div key={idx} style={itemBoxStyle}>
-          <RowHeader>
-            <span>Diagnosis {idx + 1}</span>
-            <DeleteButton
+                return (
+                  <div key={idx} style={itemBoxStyle}>
+                    <RowHeader>
+                      <span>Diagnosis {idx + 1}</span>
+                      <DeleteButton
+                        onClick={() =>
+                          removePRow("diagnoses", idx, {
+                            name: "",
+                            by: "",
+                            date: "",
+                            status: "",
+                          })
+                        }
+                      />
+                    </RowHeader>
+
+                    <InputDemo
+                      label="Name"
+                      liveVal={d?.name || ""}
+                      demoVal={dDefaults.name}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "name", val)
+                      }
+                    />
+                    <InputDemo
+                      label="By (Clinician)"
+                      liveVal={d?.by || ""}
+                      demoVal={dDefaults.by}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "by", val)
+                      }
+                    />
+                    <InputDemo
+                      label="Date"
+                      liveVal={d?.date || ""}
+                      demoVal={dDefaults.date}
+                      onChange={(val) =>
+                        updatePArray("diagnoses", idx, "date", val)
+                      }
+                    />
+
+                    <label
+                      style={{
+                        flex: "1 1 200px",
+                        minWidth: "180px",
+                        fontSize: "13px",
+                        display: "flex",
+                        flexDirection: "column",
+                        boxSizing: "border-box",
+                        maxWidth: "100%",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 500,
+                          marginBottom: "6px",
+                          fontSize: "13px",
+                          color: "#111",
+                        }}
+                      >
+                        Status
+                      </div>
+                      <select
+                        value={statusVal}
+                        onChange={(e) =>
+                          updatePArray(
+                            "diagnoses",
+                            idx,
+                            "status",
+                            e.target.value
+                          )
+                        }
+                        style={{
+                          ...baseInputShape,
+                          color: statusVal ? "#000" : "#6b7280",
+                          fontStyle: statusVal ? "normal" : "italic",
+                        }}
+                      >
+                        <option value="">— Select —</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="suspected">Suspected</option>
+                      </select>
+                    </label>
+                  </div>
+                );
+              }
+            )}
+
+            <AddRowButton
+              label="+ Add Diagnosis"
               onClick={() =>
-                removePRow("diagnoses", idx, {
+                addPRow("diagnoses", {
                   name: "",
                   by: "",
                   date: "",
@@ -1066,83 +1056,8 @@ function updatePArray(field, idx, key, value) {
                 })
               }
             />
-          </RowHeader>
-
-          <InputDemo
-            label="Name"
-            liveVal={d?.name || ""}
-            demoVal={dDefaults.name || "e.g., ME/CFS"}
-            onChange={(val) => updatePArray("diagnoses", idx, "name", val)}
-          />
-          <InputDemo
-            label="By (Clinician)"
-            liveVal={d?.by || ""}
-            demoVal={dDefaults.by || "e.g., Dr. L. Patel, Neurology"}
-            onChange={(val) => updatePArray("diagnoses", idx, "by", val)}
-          />
-          <InputDemo
-            label="Date"
-            liveVal={d?.date || ""}
-            demoVal={dDefaults.date || "e.g., June 2008"}
-            onChange={(val) => updatePArray("diagnoses", idx, "date", val)}
-          />
-
-          <label
-            style={{
-              flex: "1 1 200px",
-              minWidth: "180px",
-              fontSize: "13px",
-              display: "flex",
-              flexDirection: "column",
-              boxSizing: "border-box",
-              maxWidth: "100%",
-              marginBottom: "12px",
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 500,
-                marginBottom: "6px",
-                fontSize: "13px",
-                color: "#111",
-              }}
-            >
-              Status
-            </div>
-            <select
-              value={statusVal}
-              onChange={(e) =>
-                updatePArray("diagnoses", idx, "status", e.target.value)
-              }
-              style={{
-                ...baseInputShape,
-                color: statusVal ? "#000" : "#6b7280",
-                fontStyle: statusVal ? "normal" : "italic",
-              }}
-            >
-              <option value="">– Select –</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="suspected">Suspected</option>
-            </select>
-          </label>
+          </section>
         </div>
-      );
-    })}
-
-    <AddRowButton
-      label="+ Add Diagnosis"
-      onClick={() =>
-        addPRow("diagnoses", {
-          name: "",
-          by: "",
-          date: "",
-          status: "",
-        })
-      }
-    />
-  </section>
-</div>
-
 
         {/* Hospitalizations */}
         <div ref={sectionRefs.current.hosp} data-section-id="hosp">
@@ -1150,8 +1065,10 @@ function updatePArray(field, idx, key, value) {
             <header style={headerRowStyle}>
               <h2 style={cardHeaderTitleStyle}>Hospitalizations</h2>
             </header>
-            {ensureArrayField("hospitalizations").map((h, idx) => {
-
+            {(Array.isArray(P_live.hospitalizations)
+              ? P_live.hospitalizations
+              : []
+            ).map((h, idx) => {
               const hDefaults = (P_default.hospitalizations || [])[idx] || {};
               return (
                 <div key={idx} style={itemBoxStyle}>
@@ -1257,8 +1174,8 @@ function updatePArray(field, idx, key, value) {
             />
 
             <SectionMini>Allergies</SectionMini>
-            {ensureArrayField("allergies").map((a, idx) => {
-
+            {(Array.isArray(P_live.allergies) ? P_live.allergies : []).map(
+              (a, idx) => {
                 const aDefaults = (P_default.allergies || [])[idx] || {};
                 return (
                   <div key={idx} style={itemBoxStyle}>
@@ -1311,8 +1228,8 @@ function updatePArray(field, idx, key, value) {
             <header style={headerRowStyle}>
               <h2 style={cardHeaderTitleStyle}>Procedures & Surgeries</h2>
             </header>
-            {ensureArrayField("procedures").map((p, idx) => {
-
+            {(Array.isArray(P_live.procedures) ? P_live.procedures : []).map(
+              (p, idx) => {
                 const pDefaults = (P_default.procedures || [])[idx] || {};
                 return (
                   <div key={idx} style={itemBoxStyle}>
@@ -1378,8 +1295,8 @@ function updatePArray(field, idx, key, value) {
             <header style={headerRowStyle}>
               <h2 style={cardHeaderTitleStyle}>Treatments</h2>
             </header>
-            {ensureArrayField("treatments").map((t, idx) => {
-
+            {(Array.isArray(P_live.treatments) ? P_live.treatments : []).map(
+              (t, idx) => {
                 const tDefaults = (P_default.treatments || [])[idx] || {};
                 return (
                   <div key={idx} style={itemBoxStyle}>
@@ -1460,8 +1377,10 @@ function updatePArray(field, idx, key, value) {
             <header style={headerRowStyle}>
               <h2 style={cardHeaderTitleStyle}>Tests & Imaging</h2>
             </header>
-            {ensureArrayField("testsImaging").map((ti, idx) => {
-
+            {(Array.isArray(P_live.testsImaging)
+              ? P_live.testsImaging
+              : []
+            ).map((ti, idx) => {
               const tiDefaults = (P_default.testsImaging || [])[idx] || {};
               return (
                 <div key={idx} style={itemBoxStyle}>
@@ -1540,8 +1459,8 @@ function updatePArray(field, idx, key, value) {
             <header style={headerRowStyle}>
               <h2 style={cardHeaderTitleStyle}>Doctors / Specialists</h2>
             </header>
-           {ensureArrayField("doctors").map((d, idx) => {
-
+            {(Array.isArray(P_live.doctors) ? P_live.doctors : []).map(
+              (d, idx) => {
                 const dDefaults = (P_default.doctors || [])[idx] || {};
                 return (
                   <div key={idx} style={itemBoxStyle}>
