@@ -1,0 +1,106 @@
+/* --- AppButton.css (minimal, colored, ripple) --- */
+
+/* sizes and colors */
+:root {
+  --btn-radius: 12px;
+  --btn-h-sm: 32px;
+  --btn-h-md: 40px;
+  --btn-h-lg: 44px;
+
+  --primary: #16a34a;      /* green */
+  --primary-700: #15803d;
+  --primary-800: #166534;
+
+  --neutral-text: #0b1115; /* secondary */
+  --neutral-bg: #f8fafc;
+  --neutral-bg-h: #eef2f7;
+
+  --danger: #dc2626;
+  --danger-700: #b91c1c;
+  --danger-800: #991b1b;
+}
+
+/* BASE: make ripple work and set default fill */
+.btn {
+  position: relative;              /* needed for ripple */
+  overflow: hidden;                /* clip ripple */
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: var(--btn-h-md);
+  padding: 0 14px;
+  border-radius: var(--btn-radius);
+  border: 1px solid transparent;
+
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+
+  color: #fff !important;
+  background: var(--primary) !important;   /* default: green */
+  box-shadow: 0 1px 1px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+  transform: translateY(0);
+  transition: transform .04s ease, filter .15s ease, background-color .15s ease, box-shadow .2s ease;
+}
+
+.btn:hover { filter: brightness(.96); }
+.btn:active { transform: translateY(1px); }
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 0 0 6px rgba(34,197,94,.35);
+}
+
+/* sizes */
+.btn-sm { min-height: var(--btn-h-sm); padding: 0 12px; font-size: 13px; }
+.btn-md { min-height: var(--btn-h-md); font-size: 14px; }
+.btn-lg { min-height: var(--btn-h-lg); padding: 0 16px; font-size: 15px; }
+.btn-fullWidth { width: 100%; }
+
+/* variants */
+.btn-primary {
+  color: #fff !important;
+  background: linear-gradient(to bottom, #22c55e, var(--primary)) !important;
+  border-color: rgba(22,163,74,.15);
+}
+.btn-primary:hover { background: var(--primary-700) !important; }
+.btn-primary:active { background: var(--primary-800) !important; }
+
+.btn-secondary {
+  color: var(--neutral-text) !important;
+  background: var(--neutral-bg) !important;
+  border-color: #e5e7eb;
+}
+.btn-secondary:hover { background: var(--neutral-bg-h) !important; }
+
+.btn-danger {
+  color: #fff !important;
+  background: var(--danger) !important;
+  border-color: rgba(220,38,38,.18);
+}
+.btn-danger:hover { background: var(--danger-700) !important; }
+.btn-danger:active { background: var(--danger-800) !important; }
+
+/* ripple */
+.ripple-ink {
+  position: absolute;
+  pointer-events: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.35);
+  transform: translate(-50%, -50%) scale(1);
+  animation: btn-ripple .55s ease-out forwards;
+  mix-blend-mode: screen;
+}
+@keyframes btn-ripple {
+  from { opacity: .6; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0;  transform: translate(-50%, -50%) scale(22); }
+}
+
+/* print */
+@media print { .btn { display: none !important; } }

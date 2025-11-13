@@ -1,277 +1,441 @@
 // src/App.js
-import React, { useState, useEffect } from "react";
-import WelcomeScreen from "./WelcomeScreen";
+import React, { useEffect, useRef, useState } from "react";
+import WelcomeScreen from "./WelcomePageV2";
+import LoginScreen from "./LoginScreen";
 import CardLayoutView from "./CardLayoutView";
+import AppButton from "./components/AppButton";
 
-/** ------------ LOGIN SCREEN ------------ */
-function LoginScreen({ onLogin, onShowSignup }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const SESSION_KEY = "auth_session_v1";
 
-  return (
-    <div className="app-shell">
-      <main className="welcome-main">
-        <div className="login-card">
-          <div className="login-heading">Log in</div>
-          <div className="login-subheading">Enter your details to continue.</div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <label style={{ fontSize: 13, color: "#111" }}>
-              <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 13 }}>
-                Email
-              </div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #bbb",
-                  fontSize: 14,
-                }}
-              />
-            </label>
-
-            <label style={{ fontSize: 13, color: "#111" }}>
-              <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 13 }}>
-                Password
-              </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #bbb",
-                  fontSize: 14,
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="welcome-actions" style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn primary-btn"
-              onClick={() => {
-                // real auth can go here later; for now just hand off
-                onLogin();
-              }}
-            >
-              Log in
-            </button>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              fontSize: 13,
-              color: "#2563eb",
-              marginTop: 10,
-              cursor: "pointer",
-            }}
-            onClick={onShowSignup}
-          >
-            Create new account
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-/** ------------ SIGNUP SCREEN ------------ */
-function SignupScreen({ onSignupComplete, onBackToLogin }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-
-  return (
-    <div className="app-shell">
-      <main className="welcome-main">
-        <div className="login-card">
-          <div className="login-heading">Create account</div>
-          <div className="login-subheading">Fill in details to register.</div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <label style={{ fontSize: 13 }}>
-              <div style={{ fontWeight: 500, marginBottom: 4 }}>Email</div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #bbb",
-                  fontSize: 14,
-                }}
-              />
-            </label>
-
-            <label style={{ fontSize: 13 }}>
-              <div style={{ fontWeight: 500, marginBottom: 4 }}>Password</div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #bbb",
-                  fontSize: 14,
-                }}
-              />
-            </label>
-
-            <label style={{ fontSize: 13 }}>
-              <div style={{ fontWeight: 500, marginBottom: 4 }}>
-                Confirm password
-              </div>
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #bbb",
-                  fontSize: 14,
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="welcome-actions" style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              className="btn primary-btn"
-              onClick={() => {
-                // later: validate and call API; for now just treat as logged in
-                onSignupComplete();
-              }}
-            >
-              Sign up
-            </button>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              fontSize: 13,
-              color: "#2563eb",
-              marginTop: 10,
-              cursor: "pointer",
-            }}
-            onClick={onBackToLogin}
-          >
-            Back to log in
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-/** ------------ MAIN APP ------------ */
-
-function getInitialScreen() {
-  // "welcome" | "login" | "main"
-  if (typeof window === "undefined") return "welcome";
+function readSession() {
   try {
-    const hasSeenWelcome = localStorage.getItem("hasSeenWelcome") === "yes";
-    const isLoggedIn = !!localStorage.getItem("seenUser");
-    if (!hasSeenWelcome) return "welcome";
-    return isLoggedIn ? "main" : "login";
+    return localStorage.getItem(SESSION_KEY) === "true";
   } catch {
-    return "welcome";
+    return false;
   }
 }
 
-function App() {
-  const [screen, setScreen] = useState(getInitialScreen);
-  const [currentPatientName, setCurrentPatientName] = useState("");
+const USER_STORAGE_KEY = "auth_users_v1";
 
-  // tab title
-  useEffect(() => {
-    const name = (currentPatientName || "").trim();
-    document.title = name ? `SEEN: ${name}` : "SEEN";
-  }, [currentPatientName]);
+// REAL MODE: 28-minute inactivity, warn 30 seconds before
+const INACTIVITY_LIMIT_MS = 28 * 60 * 1000; // 28 minutes
+const WARNING_BEFORE_MS = 30 * 1000;        // 30 seconds
 
-  // from welcome
-  const handleWelcomeStart = () => {
-    try {
-      localStorage.setItem("hasSeenWelcome", "yes");
-    } catch {}
-    const loggedIn =
-      typeof window !== "undefined" &&
-      !!localStorage.getItem("seenUser");
-    setScreen(loggedIn ? "main" : "login");
+// ---------- account helpers ----------
+function readUser() {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+
+    if (Array.isArray(parsed)) {
+      if (parsed.length > 0 && parsed[0] && typeof parsed[0] === "object") {
+        return parsed[0];
+      }
+      return null;
+    }
+
+    if (parsed && typeof parsed === "object") {
+      return parsed;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function writeUser(user) {
+  try {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  } catch {
+    // ignore
+  }
+}
+
+export default function App() {
+  // currentUser restored from session if present
+  const [currentUser, setCurrentUser] = useState(() => {
+    const hasSession = readSession();
+    if (!hasSession) return null;
+    return readUser();
+  });
+
+  // Startup: if an account exists + session, go straight to form.
+  // Otherwise: account → login, no account → welcome.
+  const [screen, setScreen] = useState(() => {
+    const account = readUser();
+    const hasSession = readSession();
+    if (account && hasSession) return "form";
+    return account ? "login" : "welcome"; // "welcome" | "login" | "form"
+  });
+
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockPassword, setLockPassword] = useState("");
+  const [lockError, setLockError] = useState("");
+
+  const lastActivityRef = useRef(Date.now());
+
+  // ----- auth flow -----
+  const handleAccountCreated = (user) => {
+    if (user) {
+      writeUser(user); // persist account
+      setCurrentUser(user);
+      setIsLocked(false);
+      setShowTimeoutWarning(false);
+      lastActivityRef.current = Date.now();
+      try {
+        localStorage.setItem(SESSION_KEY, "true");
+      } catch {
+        // ignore
+      }
+    }
+    setScreen("form");
   };
 
-  // login → main
-  const handleLoginSuccess = () => {
-    try {
-      localStorage.setItem("seenUser", "active");
-    } catch {}
-    setScreen("main");
+  const handleLoggedIn = (user) => {
+    if (user) {
+      writeUser(user); // keep stored account updated
+      setCurrentUser(user);
+      setIsLocked(false);
+      setShowTimeoutWarning(false);
+      lastActivityRef.current = Date.now();
+      try {
+        localStorage.setItem(SESSION_KEY, "true");
+      } catch {
+        // ignore
+      }
+    }
+    setScreen("form");
   };
 
-  // signup → main
-  const handleSignupComplete = () => {
-    try {
-      localStorage.setItem("seenUser", "active");
-      localStorage.setItem("hasSeenWelcome", "yes");
-    } catch {}
-    setScreen("main");
-  };
-
-  // from app → login (not welcome)
   const handleLogout = () => {
+    // End session only; account remains in localStorage
+    setCurrentUser(null);
+    setShowTimeoutWarning(false);
+    setIsLocked(false);
+    setLockPassword("");
+    setLockError("");
     try {
-      localStorage.removeItem("seenUser");
-    } catch {}
-    setCurrentPatientName("");
+      localStorage.removeItem(SESSION_KEY);
+    } catch {
+      // ignore
+    }
     setScreen("login");
   };
 
-  // routing between screens
+  const staySignedIn = () => {
+    lastActivityRef.current = Date.now();
+    setShowTimeoutWarning(false);
+  };
+
+  const handleUnlockSubmit = (e) => {
+    e?.preventDefault?.();
+    setLockError("");
+
+    const stored = readUser();
+    if (!stored) {
+      // No account? Send to full login
+      handleLogout();
+      return;
+    }
+
+    if (lockPassword === stored.password) {
+      setIsLocked(false);
+      setLockPassword("");
+      lastActivityRef.current = Date.now();
+    } else {
+      setLockError("Incorrect password. Please try again.");
+    }
+  };
+
+  const handleUnlockLogout = () => {
+    handleLogout();
+  };
+
+  // ----- inactivity / timeout -----
+  useEffect(() => {
+    // Only track when on the form, logged in, and not locked
+    if (screen !== "form" || !currentUser || isLocked) return;
+
+    lastActivityRef.current = Date.now();
+
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+      if (showTimeoutWarning) {
+        setShowTimeoutWarning(false);
+      }
+    };
+
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    window.addEventListener("click", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+
+    const intervalId = setInterval(() => {
+      const now = Date.now();
+      const idleMs = now - lastActivityRef.current;
+
+      if (idleMs >= INACTIVITY_LIMIT_MS) {
+        // lock overlay
+        setShowTimeoutWarning(false);
+        setIsLocked(true);
+        setLockPassword("");
+        setLockError("");
+        clearInterval(intervalId);
+        return;
+      }
+
+      const warnThreshold = INACTIVITY_LIMIT_MS - WARNING_BEFORE_MS;
+      if (idleMs >= warnThreshold) {
+        setShowTimeoutWarning(true);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("click", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      clearInterval(intervalId);
+    };
+  }, [screen, currentUser, isLocked, showTimeoutWarning]);
+
+  // ----- warning modal (20 seconds before lock) -----
+  const timeoutModal =
+    showTimeoutWarning && screen === "form" && currentUser && !isLocked ? (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9000,
+        }}
+      >
+        <div
+          style={{
+            background: "#ffffff",
+            padding: "20px 22px",
+            borderRadius: 10,
+            maxWidth: 360,
+            width: "90%",
+            boxShadow: "0 10px 30px rgba(15,23,42,0.3)",
+            fontFamily:
+              "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              marginBottom: 10,
+            }}
+          >
+            You’ll be logged out soon
+          </div>
+          <p
+            style={{
+              fontSize: 14,
+              marginBottom: 16,
+              color: "#374151",
+              lineHeight: 1.5,
+            }}
+          >
+            You&apos;ll be logged out in about 20 seconds due to inactivity.{" "}
+            <strong>Click below to stay logged in.</strong>
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <AppButton type="button" variant="primary" onClick={staySignedIn}>
+              Stay logged in
+            </AppButton>
+          </div>
+        </div>
+      </div>
+    ) : null;
+
+  // ----- lock overlay (after inactivity limit) -----
+  const lockOverlay =
+    isLocked && readUser() ? (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(66, 106, 200, 0.96)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9500,
+        }}
+      >
+        <form
+          onSubmit={handleUnlockSubmit}
+          style={{
+            background: "#ffffff",
+            padding: "22px 22px 18px",
+            borderRadius: 12,
+            maxWidth: 360,
+            width: "90%",
+            boxShadow: "0 14px 40px rgba(15,23,42,0.5)",
+            fontFamily:
+              "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              marginBottom: 6,
+            }}
+          >
+            Session locked
+          </div>
+          <p
+            style={{
+              fontSize: 14,
+              color: "#4b5563",
+              lineHeight: 1.5,
+              marginBottom: 12,
+            }}
+          >
+            For your security, you&apos;ve been logged out after inactivity.
+            Re-enter your password to continue.
+          </p>
+
+          <div style={{ marginBottom: 12, marginTop: 4 }}>
+            <label
+              htmlFor="lock-password"
+              style={{
+                display: "block",
+                fontSize: 13,
+                marginBottom: 4,
+              }}
+            >
+              Password
+            </label>
+            <input
+              id="lock-password"
+              type="password"
+              autoComplete="current-password"
+              value={lockPassword}
+              onChange={(e) => setLockPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 6,
+                border: "1px solid #d1d5db",
+                fontSize: 14,
+              }}
+            />
+          </div>
+
+          {lockError && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "#b91c1c",
+                marginBottom: 8,
+              }}
+            >
+              {lockError}
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 6,
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleUnlockLogout}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "#6b7280",
+                fontSize: 13,
+                textDecoration: "underline",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              Log out instead
+            </button>
+
+            <AppButton type="submit" variant="primary">
+              Unlock
+            </AppButton>
+          </div>
+        </form>
+      </div>
+    ) : null;
+
+  // ----- screen selection -----
   if (screen === "welcome") {
-    return <WelcomeScreen onStart={handleWelcomeStart} />;
+    return (
+      <WelcomeScreen
+        // New user: create account here
+        onCreateAccount={handleAccountCreated}
+        // Optional: if they already have an account, go to login
+        onStart={() => setScreen("login")}
+      />
+    );
+  }
+
+  // ----- screen selection -----
+  if (screen === "welcome") {
+    return (
+      <>
+        <WelcomeScreen onCreateAccount={handleAccountCreated} />
+        {timeoutModal}
+        {lockOverlay}
+      </>
+    );
   }
 
   if (screen === "login") {
     return (
-      <LoginScreen
-        onLogin={handleLoginSuccess}
-        onShowSignup={() => setScreen("signup")}
-      />
+      <>
+        <LoginScreen
+          onLoggedIn={handleLoggedIn}
+          onGoToCreate={() => setScreen("welcome")}
+        />
+        {timeoutModal}
+        {lockOverlay}
+      </>
     );
   }
 
-  if (screen === "signup") {
+  // main form
+  if (screen === "form") {
     return (
-      <SignupScreen
-        onSignupComplete={handleSignupComplete}
-        onBackToLogin={() => setScreen("login")}
-      />
+      <>
+        <CardLayoutView
+          onLogout={handleLogout}
+          // CardLayoutView handles patient/visit data itself via local state + localStorage
+        />
+        {timeoutModal}
+        {lockOverlay}
+      </>
     );
   }
 
-  // main app
+  // Fallback – if something weird happens, show login
   return (
-    <CardLayoutView
-      onPatientNameChange={setCurrentPatientName}
-      onLogout={handleLogout}
-    />
+    <>
+      <LoginScreen
+        onLoggedIn={handleLoggedIn}
+        onGoToCreate={() => setScreen("welcome")}
+      />
+      {timeoutModal}
+      {lockOverlay}
+    </>
   );
 }
-
-export default App;

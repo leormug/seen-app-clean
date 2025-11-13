@@ -1,6 +1,8 @@
 node_modules/
 build/
+builds/
 dist/
+/release/
 backups/
 .backups/
 .git_bak_*/
@@ -8,3 +10,7 @@ backups/
 *.zip
 .DS_Store
 .DS_Store
+*.dmg
+*.exe
+*.app
+

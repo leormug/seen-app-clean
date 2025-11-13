@@ -1,184 +1,206 @@
 // src/LoginScreen.js
-import React, { useState } from "react";
-import logo from "./assets/logo.png";
+import React, { useState, useEffect } from "react";
+import AppButton from "./components/AppButton";
+import seenLogo from "./assets/seen-logo.png";
 
-const STORAGE_KEY = "seenUser";
+const USER_STORAGE_KEY = "auth_users_v1";
 
-function loadUser() {
+function readUser() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    console.log("[Login] raw from localStorage:", raw);
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
     if (!raw) return null;
+
     const parsed = JSON.parse(raw);
-    console.log("[Login] parsed user:", parsed);
-    return parsed;
-  } catch (err) {
-    console.error("[Login] error reading user from localStorage:", err);
+
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed[0];
+    }
+    if (parsed && typeof parsed === "object") {
+      return parsed;
+    }
+    return null;
+  } catch {
     return null;
   }
 }
 
 export default function LoginScreen({ onLoggedIn, onGoToCreate }) {
-  const saved = loadUser();
-  const [username, setUsername] = useState(saved?.name || "");
+  const existing = readUser();
+
+  // Always start blank
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [timeoutMessage, setTimeoutMessage] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("timeout") === "1") {
+      setTimeoutMessage(
+        "Session timed out for your security. Please log back in."
+      );
+    } else {
+      setTimeoutMessage("");
+    }
+  }, []);
 
   function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    console.log("[Login] handleSubmit, saved =", saved);
-
-    if (!saved) {
-      setError("No account found on this device. Please create one.");
+    if (!existing) {
+      setError("No account found. Please create an account first.");
       return;
     }
 
-    if (password !== saved.password) {
-      setError("Incorrect password.");
+    if (username.trim() !== existing.name || password !== existing.password) {
+      setError("Incorrect username or password.");
       return;
     }
 
-    if (typeof onLoggedIn === "function") onLoggedIn();
+    // Mark session as active
+    localStorage.setItem(
+      "auth_session",
+      JSON.stringify({
+        startedAt: Date.now(),
+        userName: existing.name,
+      })
+    );
+
+    if (onLoggedIn) {
+      onLoggedIn(existing);
+    }
   }
 
   return (
     <div
+      className="login-screen"
       style={{
         minHeight: "100vh",
-        background: "#f3f4f6",
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
         justifyContent: "center",
-        padding: "24px",
+        alignItems: "center",
+        padding: 24,
         boxSizing: "border-box",
       }}
     >
+      {/* Logo + title */}
       <div
         style={{
-          width: "100%",
-          maxWidth: 520,
-          background: "#ffffff",
-          borderRadius: 24,
-          boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
-          padding: "32px 40px 32px",
-          boxSizing: "border-box",
-          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          marginBottom: 24,
         }}
       >
-        {/* Logo */}
-        <div style={{ marginBottom: 20 }}>
-          <img
-            src={logo}
-            alt="SEEN logo"
-            style={{
-              width: 112,
-              height: 112,
-              objectFit: "contain",
-              borderRadius: 24,
-            }}
-          />
-        </div>
-
-        {/* Title */}
-        <h1
+        <img
+          src={seenLogo}
+          alt="SEEN logo"
           style={{
-            margin: "0 0 24px 0",
-            fontSize: 32,
-            fontWeight: 700,
-            color: "#111827",
+            width: 80,
+            height: 80,
+            objectFit: "contain",
+            marginBottom: 8,
+          }}
+        />
+        <h1 style={{ fontSize: 24, margin: 0 }}>SEEN</h1>
+        <div
+          style={{
+            fontSize: 14,
+            color: "#555",
+            fontVariant: "small-caps",
+            letterSpacing: "0.06em",
+            marginTop: 4,
           }}
         >
-          Sign in
-        </h1>
+          finally taken seriously
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} style={{ textAlign: "left" }}>
+      {/* Messages */}
+      {timeoutMessage && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: 8,
+            borderRadius: 4,
+            background: "#fff3cd",
+            color: "#856404",
+            fontSize: 14,
+            maxWidth: 360,
+          }}
+        >
+          {timeoutMessage}
+        </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: 8,
+            borderRadius: 4,
+            background: "#f8d7da",
+            color: "#721c24",
+            fontSize: 14,
+            maxWidth: 360,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* Single form */}
+      <form
+        onSubmit={handleSubmit}
+        autoComplete="off"
+        style={{ maxWidth: 360, width: "100%", margin: "0 auto" }}
+      >
+        {/* Username */}
+        <label style={{ display: "block", marginBottom: 12, fontSize: 14 }}>
+          <div style={{ marginBottom: 4, fontWeight: 500 }}>Username</div>
           <input
             type="text"
-            placeholder="Username"
+            name="seen-username"
+            autoComplete="off"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
             style={{
               width: "100%",
-              padding: "10px 12px",
+              padding: 8,
               fontSize: 14,
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              marginBottom: 8,
               boxSizing: "border-box",
-              backgroundColor: "#ffffff",
             }}
           />
+        </label>
 
+        {/* Password */}
+        <label style={{ display: "block", marginBottom: 16, fontSize: 14 }}>
+          <div style={{ marginBottom: 4, fontWeight: 500 }}>Password</div>
           <input
             type="password"
-            placeholder="Password"
+            name="seen-password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
             style={{
               width: "100%",
-              padding: "10px 12px",
+              padding: 8,
               fontSize: 14,
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              marginBottom: 8,
               boxSizing: "border-box",
             }}
           />
+        </label>
 
-          {error && (
-            <div
-              style={{
-                marginTop: 4,
-                marginBottom: 8,
-                fontSize: 13,
-                color: "#dc2626",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              marginTop: 4,
-              padding: "12px 16px",
-              borderRadius: 999,
-              border: "none",
-              background: "#020617",
-              color: "#ffffff",
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 0 0 1px rgba(148,163,184,0.6)",
-            }}
-          >
-            Sign in
-          </button>
-        </form>
-
-        <button
-          type="button"
-          onClick={onGoToCreate}
-          style={{
-            marginTop: 16,
-            padding: 0,
-            border: "none",
-            background: "transparent",
-            fontSize: 13,
-            color: "#111827",
-            textDecoration: "underline",
-            cursor: "pointer",
-          }}
-        >
-          Create a new account
-        </button>
-      </div>
+        {/* Buttons */}
+        <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+          <AppButton type="submit" variant="primary" style={{ flex: 1 }}>
+            Log in
+          </AppButton>
+          
+        </div>
+      </form>
     </div>
   );
 }
