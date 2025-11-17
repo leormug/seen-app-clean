@@ -21,7 +21,16 @@ Use meaningful branch names:
 
 ---
 
-## 2. Edit and Commit Frequently
+## 2. Update the Version Automatically
+
+Run `npm version patch`, `npm version minor`, or `npm version major` according to the scope of the release.  
+This updates `package.json`, creates a git commit, and tags the release so every artifact shares the same version.
+
+Add npm `version` or `postversion` scripts if additional files (like release notes) must update alongside the version change.
+
+---
+
+## 3. Edit and Commit Frequently
 
 While working in VS Code, commit in small steps.
 
@@ -33,7 +42,7 @@ Repeat as needed.
 
 ---
 
-## 3. Merge Into main
+## 4. Merge Into main
 
 When the feature is ready and tested:
 
@@ -46,7 +55,7 @@ Resolve conflicts if they appear, then run the app to confirm it works.
 
 ---
 
-## 4. Push main to GitHub
+## 5. Push main to GitHub
 
 Command:
 - git push  
@@ -55,7 +64,7 @@ Now GitHub has your updated source code.
 
 ---
 
-## 5. Create a Timestamped Backup ZIP
+## 6. Create a Timestamped Backup ZIP
 
 Before building, create a backup snapshot.
 
@@ -67,7 +76,7 @@ This ensures you can roll back any build.
 
 ---
 
-## 6. Build the Apps
+## 7. Build the Apps
 
 ### macOS Build
 - npm run dist:mac  
@@ -83,7 +92,7 @@ Open both apps to confirm they launch correctly.
 
 ---
 
-## 7. Draft a New GitHub Release
+## 8. Draft a New GitHub Release
 
 Steps:
 1. Go to GitHub → Releases → Draft a new release  
@@ -97,7 +106,7 @@ GitHub will generate permanent public download URLs.
 
 ---
 
-## 8. Update Landing Page Links
+## 9. Update Landing Page Links
 
 Edit the SEEN website HTML to replace old download URLs with the new ones from the release.
 
@@ -109,7 +118,7 @@ Then commit and push:
 
 ---
 
-## 9. Final Sanity Check
+## 10. Final Sanity Check
 
 Test on real machines or VMs:
 
@@ -121,6 +130,6 @@ Ensure everything loads correctly.
 
 ---
 
-## 10. Done
+## 11. Done
 
 The new SEEN version is officially released.

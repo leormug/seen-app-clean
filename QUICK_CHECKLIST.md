@@ -12,14 +12,20 @@ Follow these steps in order for every new version.
 
 ---
 
-## 2. Edit + commit
+## 2. Update version
+- npm version patch|minor|major  
+- (Optional) npm version scripts update other files  
+
+---
+
+## 3. Edit + commit
 - Make changes  
 - git add .  
 - git commit -m "Message"  
 
 ---
 
-## 3. Merge into main
+## 4. Merge into main
 - git checkout main  
 - git pull  
 - git merge edit-XX  
@@ -27,18 +33,18 @@ Follow these steps in order for every new version.
 
 ---
 
-## 4. Push main
+## 5. Push main
 - git push  
 
 ---
 
-## 5. Backup
+## 6. Backup
 - mkdir -p backups  
 - zip -r backups/SEEN.\$(date +"%Y-%m-%d_%H%M").zip .  
 
 ---
 
-## 6. Build
+## 7. Build
 - npm run dist:mac  
 - npm run dist:win  
 
@@ -46,7 +52,7 @@ Verify both outputs in `dist/`.
 
 ---
 
-## 7. Publish GitHub Release
+## 8. Publish GitHub Release
 - Go to Releases → Draft new release  
 - Tag: vX.X.X  
 - Title: SEEN X.X.X  
@@ -55,7 +61,7 @@ Verify both outputs in `dist/`.
 
 ---
 
-## 8. Update website links
+## 9. Update website links
 - Replace old download URLs  
 - git add .  
 - git commit -m "Update links"  
@@ -63,12 +69,12 @@ Verify both outputs in `dist/`.
 
 ---
 
-## 9. Final tests
+## 10. Final tests
 - Install Mac build  
 - Install Windows build  
 - Test PWA version  
 
 ---
 
-## 10. Done
+## 11. Done
 Release is complete.
