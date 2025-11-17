@@ -114,7 +114,7 @@ export default function LoginScreen({ onLoggedIn, onGoToCreate }) {
             marginTop: 4,
           }}
         >
-          finally taken seriously
+          Be heard. Be believed.
         </div>
       </div>
 

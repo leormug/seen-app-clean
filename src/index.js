@@ -13,3 +13,14 @@ root.render(
     <App />
   </React.StrictMode>
 );
+// Register minimal service worker for PWA installability.
+// Does not cache or transmit any user data.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register(`${process.env.PUBLIC_URL}/service-worker.js`)
+      .catch((err) => {
+        console.error("Service worker registration failed:", err);
+      });
+  });
+}

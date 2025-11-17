@@ -81,7 +81,7 @@ export default function WelcomePageV2({ onCreateAccount }) {
             marginBottom: 20,
           }}
         >
-          finally taken seriously
+          Be heard. Be believed.
         </div>
 
         <h2 style={{ fontSize: 22, margin: "20px 0 10px" }}>Welcome</h2>
