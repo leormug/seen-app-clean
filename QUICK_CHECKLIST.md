@@ -40,7 +40,8 @@ Follow these steps in order for every new version.
 
 ## 6. Backup
 - mkdir -p backups  
-- zip -r backups/SEEN.\$(date +"%Y-%m-%d_%H%M").zip .  
+- VERSION=$(npm pkg get version | tr -d \")  
+- zip -r "backups/SEEN-${VERSION}.$(date +"%Y-%m-%d_%H%M").zip" .  
 
 ---
 

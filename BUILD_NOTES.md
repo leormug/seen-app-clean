@@ -70,9 +70,10 @@ Before building, create a backup snapshot.
 
 Commands:
 - mkdir -p backups  
-- zip -r backups/SEEN.\$(date +"%Y-%m-%d_%H%M").zip .  
+- VERSION=$(npm pkg get version | tr -d \")  
+- zip -r "backups/SEEN-${VERSION}.$(date +"%Y-%m-%d_%H%M").zip" .  
 
-This ensures you can roll back any build.
+This ensures you can roll back any build and labels the ZIP with the app version for easy reference.
 
 ---
 
