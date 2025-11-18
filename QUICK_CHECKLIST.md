@@ -47,6 +47,7 @@ Follow these steps in order for every new version.
 ## 7. Build
 - npm run dist:mac  
 - npm run dist:win  
+- Ensure `GH_TOKEN` is set so electron-builder can upload auto-update assets.
 
 Verify both outputs in `dist/`.
 
@@ -62,7 +63,7 @@ Verify both outputs in `dist/`.
 ---
 
 ## 9. Update website links
-- Replace old download URLs  
+- Replace old download URLs (see `WEBSITE_UPDATE.md` for snippet)  
 - git add .  
 - git commit -m "Update links"  
 - git push  

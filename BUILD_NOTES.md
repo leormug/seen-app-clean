@@ -92,6 +92,16 @@ Open both apps to confirm they launch correctly.
 
 ---
 
+### Auto-Update + GitHub Upload
+
+`electron-builder` now auto-publishes release artifacts (DMG/EXE + update metadata) to GitHub.
+
+- Set `GH_TOKEN=<your Personal Access Token>` before running `npm run dist:mac` or `npm run dist:win`.  
+- When the release assets finish uploading, every installed SEEN desktop app checks GitHub for updates on launch and prompts the user to restart once a download is ready.
+- You still need to publish the GitHub Release (next step) so the download links are public.
+
+---
+
 ## 8. Draft a New GitHub Release
 
 Steps:
@@ -108,7 +118,8 @@ GitHub will generate permanent public download URLs.
 
 ## 9. Update Landing Page Links
 
-Edit the SEEN website HTML to replace old download URLs with the new ones from the release.
+Edit the SEEN website HTML to replace old download URLs with the new ones from the release.  
+Use `WEBSITE_UPDATE.md` for the exact copy/paste snippet and instructions.
 
 Then commit and push:
 

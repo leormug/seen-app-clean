@@ -8,6 +8,7 @@
   "homepage": "./",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "electron-updater": "^6.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1"
@@ -57,7 +58,15 @@
       ],
       "artifactName": "${productName}-Setup-${version}.exe",
       "icon": "assets/icon.ico"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "leormug",
+        "repo": "seen-app-clean",
+        "releaseType": "release"
+      }
+    ]
   },
   "browserslist": {
     "production": [
