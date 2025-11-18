@@ -30,8 +30,8 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:mac": "npm run build && electron-builder --mac --publish always",
+    "dist:win": "npm run build && electron-builder --win --publish always"
   },
   "build": {
     "appId": "com.seen.mymedicalapp",
