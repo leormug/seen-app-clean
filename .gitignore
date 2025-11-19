@@ -9,8 +9,6 @@ backups/
 *.log
 *.zip
 .DS_Store
-.DS_Store
 *.dmg
 *.exe
 *.app
-
