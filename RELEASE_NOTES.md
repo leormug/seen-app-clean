@@ -5,6 +5,26 @@ Each new release should append a new section at the top.
 
 ---
 
+## Version 0.4.5 – 2025-11-19
+
+### Summary
+Polish release to improve the intro/signup journey and tighten print output.
+
+### New
+- Added an updated intro + signup flow to guide first-time users.
+
+### Improved
+- Refined intro instructions copy.
+- Tweaked print layout to keep summaries readable.
+
+### Fixed
+- Minor print quirks resolved during layout tweaks.
+
+### Known Issues
+- None noted.
+
+---
+
 ## Version x.x.x – YYYY-MM-DD
 
 ### Summary
@@ -57,4 +77,3 @@ Example: “Stability improvements and updated download links.”
 - Match the version tag used in GitHub Releases.
 - Avoid technical noise (stack traces, logs, screenshots).  
   Only summarize the user-visible changes.
-
