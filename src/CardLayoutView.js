@@ -957,8 +957,9 @@ function updatePArray(field, idx, key, value) {
           "-apple-system,BlinkMacSystemFont,'SF Pro Text',Roboto,sans-serif",
         backgroundColor: "#f5f6f8",
         minHeight: "100vh",
+        minHeight: "100dvh",
         padding: "16px",
-        paddingBottom: "32px",
+        paddingBottom: "80px",
         color: "#1a1a1a",
         maxWidth: "700px",
         margin: "0 auto",
@@ -966,7 +967,7 @@ function updatePArray(field, idx, key, value) {
         flexDirection: "column",
         boxSizing: "border-box",
         width: "100%",
-        overflowY: "auto",        // <-- added
+        overflowX: "hidden",
       }}
     >
 

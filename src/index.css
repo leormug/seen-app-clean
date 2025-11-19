@@ -5,12 +5,20 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto,
     sans-serif;
   background: #f5f6f8;
   color: #111;
+  overscroll-behavior-y: contain;
+  overflow-x: hidden;
 }
 
 #root {
