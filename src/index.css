@@ -200,6 +200,44 @@ body {
   color: #374151;
 }
 
+/* ---------- INTRO SCREEN ---------- */
+.intro-root {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.intro-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18);
+  padding: 40px 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.intro-logo {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 24px;
+  object-fit: contain;
+}
+
+.intro-title {
+  font-size: 28px;
+  margin: 0 0 12px;
+}
+
+.intro-copy {
+  font-size: 16px;
+  color: #4b5563;
+  margin: 0 0 24px;
+}
+
 .welcome-steps li {
   margin-bottom: 6px;
 }
@@ -297,7 +335,17 @@ body {
   }
 
   @page {
-    margin: 1.25in 1in 1.25in 1in;
+    margin: 0.8in 0.8in 1in;
+    size: auto;
+  }
+
+  body::after {
+    content: "Page " counter(page);
+    position: fixed;
+    bottom: 0.3in;
+    right: 0.8in;
+    font-size: 10pt;
+    color: #4b5563;
   }
 
   /* keep each section together but don't force breaks */

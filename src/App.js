@@ -1,21 +1,20 @@
 // src/App.js
 import React, { useEffect, useRef, useState } from "react";
-import WelcomeScreen from "./WelcomePageV2";
+import IntroScreen from "./IntroScreen";
+import SignupScreen from "./SignupScreen";
 import LoginScreen from "./LoginScreen";
 import CardLayoutView from "./CardLayoutView";
 import AppButton from "./components/AppButton";
 
 const SESSION_KEY = "auth_session_v1";
-
-function readSession() {
-  try {
-    return localStorage.getItem(SESSION_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
 const USER_STORAGE_KEY = "auth_users_v1";
+
+const SCREENS = {
+  INTRO: "intro",
+  SIGNUP: "signup",
+  LOGIN: "login",
+  APP: "app",
+};
 
 // REAL MODE: 28-minute inactivity, warn 30 seconds before
 const INACTIVITY_LIMIT_MS = 28 * 60 * 1000; // 28 minutes
@@ -55,20 +54,10 @@ function writeUser(user) {
 }
 
 export default function App() {
-  // currentUser restored from session if present
-  const [currentUser, setCurrentUser] = useState(() => {
-    const hasSession = readSession();
-    if (!hasSession) return null;
-    return readUser();
-  });
-
-  // Startup: if an account exists + session, go straight to form.
-  // Otherwise: account → login, no account → welcome.
+  const [currentUser, setCurrentUser] = useState(null);
   const [screen, setScreen] = useState(() => {
     const account = readUser();
-    const hasSession = readSession();
-    if (account && hasSession) return "form";
-    return account ? "login" : "welcome"; // "welcome" | "login" | "form"
+    return account ? SCREENS.LOGIN : SCREENS.INTRO;
   });
 
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
@@ -92,7 +81,7 @@ export default function App() {
         // ignore
       }
     }
-    setScreen("form");
+    setScreen(SCREENS.APP);
   };
 
   const handleLoggedIn = (user) => {
@@ -108,7 +97,7 @@ export default function App() {
         // ignore
       }
     }
-    setScreen("form");
+    setScreen(SCREENS.APP);
   };
 
   const handleLogout = () => {
@@ -123,7 +112,7 @@ export default function App() {
     } catch {
       // ignore
     }
-    setScreen("login");
+    setScreen(SCREENS.LOGIN);
   };
 
   const staySignedIn = () => {
@@ -158,7 +147,7 @@ export default function App() {
   // ----- inactivity / timeout -----
   useEffect(() => {
     // Only track when on the form, logged in, and not locked
-    if (screen !== "form" || !currentUser || isLocked) return;
+    if (screen !== SCREENS.APP || !currentUser || isLocked) return;
 
     lastActivityRef.current = Date.now();
 
@@ -205,7 +194,7 @@ export default function App() {
 
   // ----- warning modal (20 seconds before lock) -----
   const timeoutModal =
-    showTimeoutWarning && screen === "form" && currentUser && !isLocked ? (
+    showTimeoutWarning && screen === SCREENS.APP && currentUser && !isLocked ? (
       <div
         style={{
           position: "fixed",
@@ -378,62 +367,42 @@ export default function App() {
     ) : null;
 
   // ----- screen selection -----
-  if (screen === "welcome") {
-    return (
-      <WelcomeScreen
-        // New user: create account here
-        onCreateAccount={handleAccountCreated}
-        // Optional: if they already have an account, go to login
-        onStart={() => setScreen("login")}
-      />
-    );
-  }
-
-  // ----- screen selection -----
-  if (screen === "welcome") {
-    return (
-      <>
-        <WelcomeScreen onCreateAccount={handleAccountCreated} />
-        {timeoutModal}
-        {lockOverlay}
-      </>
-    );
-  }
-
-  if (screen === "login") {
-    return (
-      <>
+  let content = null;
+  switch (screen) {
+    case SCREENS.INTRO:
+      content = <IntroScreen onGetStarted={() => setScreen(SCREENS.SIGNUP)} />;
+      break;
+    case SCREENS.SIGNUP:
+      content = <SignupScreen onSignedUp={handleAccountCreated} />;
+      break;
+    case SCREENS.LOGIN:
+      content = (
         <LoginScreen
           onLoggedIn={handleLoggedIn}
-          onGoToCreate={() => setScreen("welcome")}
+          onGoToCreate={() => setScreen(SCREENS.SIGNUP)}
         />
-        {timeoutModal}
-        {lockOverlay}
-      </>
-    );
-  }
-
-  // main form
-  if (screen === "form") {
-    return (
-      <>
+      );
+      break;
+    case SCREENS.APP:
+      content = (
         <CardLayoutView
           onLogout={handleLogout}
           // CardLayoutView handles patient/visit data itself via local state + localStorage
         />
-        {timeoutModal}
-        {lockOverlay}
-      </>
-    );
+      );
+      break;
+    default:
+      content = (
+        <LoginScreen
+          onLoggedIn={handleLoggedIn}
+          onGoToCreate={() => setScreen(SCREENS.SIGNUP)}
+        />
+      );
   }
 
-  // Fallback – if something weird happens, show login
   return (
     <>
-      <LoginScreen
-        onLoggedIn={handleLoggedIn}
-        onGoToCreate={() => setScreen("welcome")}
-      />
+      {content}
       {timeoutModal}
       {lockOverlay}
     </>
