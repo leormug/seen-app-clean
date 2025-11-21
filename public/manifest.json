@@ -3,13 +3,13 @@
   "name": "SEEN – Private Patient Summary",
   "icons": [
     {
-      "src": "icons/icon-192-rounded-v5.png",
+      "src": "icons/icon-192-rounded-v6.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512-rounded-v5.png",
+      "src": "icons/icon-512-rounded-v6.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
