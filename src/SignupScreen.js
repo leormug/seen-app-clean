@@ -79,7 +79,7 @@ export default function SignupScreen({ onSignedUp }) {
             marginBottom: 12,
           }}
         />
-        <h1 style={{ fontSize: 26, margin: 0 }}>Create your SEEN account</h1>
+        <h1 style={{ fontSize: 26, margin: 0 }}>Create your account</h1>
       </div>
 
       {error && (

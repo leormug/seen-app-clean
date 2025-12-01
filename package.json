@@ -2,7 +2,7 @@
   "name": "seen",
   "version": "0.4.5",
   "private": true,
-  "description": "SEEN – private patient summary app.",
+  "description": "SEEN app.",
   "author": "Leor Mugrabi",
   "main": "electron/main.js",
   "homepage": "./",

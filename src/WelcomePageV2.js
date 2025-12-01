@@ -97,8 +97,8 @@ export default function WelcomePageV2({ onCreateAccount }) {
           }}
         >
           <p style={{ marginTop: 0 }}>
-            SEEN helps you create a one-page health summary to give your new doctor
-            on your first appointment.
+            Create a one-page health summary to give your new doctor on your
+            first appointment.
           </p>
 
           <p style={{ fontWeight: 600, marginBottom: 6 }}>How it works:</p>

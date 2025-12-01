@@ -24,8 +24,8 @@ export default function IntroScreen({ onGetStarted }) {
           <li>
             <strong>Tell your story once.</strong>
             <span>
-              Fill in the guided form&mdash;SEEN walks you through what doctors
-              need to know.
+              Fill in the guided form&mdash;this app walks you through what
+              doctors need to know.
             </span>
           </li>
           <li>

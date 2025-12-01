@@ -23,11 +23,11 @@ function WelcomeScreen({ onStart }) {
           {/* Two-column content area */}
           <div className="welcome-content">
             <section className="welcome-column">
-              <h2 className="welcome-section-title">What SEEN helps you do</h2>
+              <h2 className="welcome-section-title">What this app helps you do</h2>
               <ul className="welcome-bullets">
                 <li>Capture your ongoing medical story in one place</li>
                 <li>Highlight what matters for today’s visit</li>
-                <li>Arrive with a clear, one-page summary</li>
+                <li>Arrive with a structured, clear summary</li>
               </ul>
             </section>
 
@@ -54,8 +54,8 @@ function WelcomeScreen({ onStart }) {
                     device.
                   </li>
                   <li>
-                    Click <strong>Print</strong> for a one-page summary to bring
-                    to your appointment.
+                    Click <strong>Print</strong> for a structured, clear summary
+                    to bring to your appointment.
                   </li>
                 </ol>
               </div>
