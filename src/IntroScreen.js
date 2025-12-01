@@ -10,27 +10,21 @@ export default function IntroScreen({ onGetStarted }) {
       <div className="intro-card">
         <img src={seenLogo} alt="SEEN logo" className="intro-logo" />
 
-        <h1 className="intro-title">Welcome to SEEN</h1>
+        <h1 className="intro-title">Welcome</h1>
 
         <h2 className="intro-steps-title">Instructions for use</h2>
         <ul className="intro-steps">
+          <span>Make your first appointment start with clarity by handing doctors the
+              context they actually read and pay attention to.<br></br><br></br> </span>
           <li>
-            <strong>Create a one-page medical summary.</strong>
-            <span>
-              Make every appointment start with clarity by handing doctors the
-              context they actually read.
-            </span>
-          </li>
-          <li>
-            <strong>Tell your story once.</strong>
-            <span>
-              Fill in the guided form&mdash;this app walks you through what
+            <strong>Tell your story.</strong>
+            <span>Fill in the guided form&mdash;this app walks you through what
               doctors need to know.
             </span>
           </li>
           <li>
-            <strong>Print and hand it over.</strong>
-            <span>Present your summary before the appointment begins.</span>
+            <strong>Print it out, hand it over.</strong>
+            <span>Present your summary directly to the new doctor before the appointment begins. </span>
           </li>
         </ul>
 
