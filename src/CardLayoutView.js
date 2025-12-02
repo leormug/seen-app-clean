@@ -430,7 +430,6 @@ const DEFAULT_PATIENT_DEFAULTS = {
       reaction: "Hives, shortness of breath",
     },
   ],
-  functionalImpact: `I am mostly bedridden and depend on others for basic tasks like meals, bathing, and transportation. Even minimal activity — such as standing or short conversations — quickly exhausts me or sends my symptoms into overdrive for days. My independence is severely limited; I rarely leave my home and require a wheelchair if I do. Cognitive fog makes organizing my thoughts and tasks difficult, so I need reminders for medications and appointments. Flare-ups mean unpredictable setbacks, making planning nearly impossible.`,
 };
 
 const DEFAULT_VISIT_DEFAULTS = {
@@ -573,11 +572,6 @@ const V_default = visitDefaults || DEFAULT_VISIT_DEFAULTS;
     isNonEmptyString(V_live.problemsTodayText) || !isInitialBlank
       ? (V_live.problemsTodayText || "").trim()
       : (V_default.problemsTodayText || "").trim();
-
-  const functionalImpactForPrint =
-    isNonEmptyString(P_live.functionalImpact) || !isInitialBlank
-      ? (P_live.functionalImpact || "").trim()
-      : (P_default.functionalImpact || "").trim();
 
   // array helpers with filtering
   function filterRows(arr, keys) {
@@ -857,7 +851,6 @@ function updatePArray(field, idx, key, value) {
     { id: "procedures", label: "Procedures" },
     { id: "treatments", label: "Treatments" },
     { id: "tests", label: "Tests & Imaging" },
-    { id: "impact", label: "Functional Impact" },
     { id: "docs", label: "Doctors" },
   ];
 
@@ -909,7 +902,6 @@ function updatePArray(field, idx, key, value) {
     const clearedPatient = {
       name: "",
       dob: "",
-      functionalImpact: "",
       diagnoses: [{ name: "", by: "", date: "", status: "" }],
       hospitalizations: [{ why: "", when: "" }],
       procedures: [{ name: "", date: "", notes: "" }],
@@ -1519,23 +1511,6 @@ function updatePArray(field, idx, key, value) {
           </section>
         </div>
 
-        {/* Functional Impact */}
-        <div ref={sectionRefs.current.impact} data-section-id="impact">
-          <section style={cardOuterStyle}>
-            <header style={headerRowStyle}>
-              <h2 style={cardHeaderTitleStyle}>Functional Impact</h2>
-            </header>
-            <TextAreaDemo
-              label="Describe how illness affects daily life, mobility, independence"
-              liveVal={P_live.functionalImpact}
-              demoVal={P_default.functionalImpact}
-              onChange={(val) => updateP("functionalImpact", val)}
-              textRef={(el) => (textareasRef.current[3] = el)}
-              autoResize={autoResize}
-            />
-          </section>
-        </div>
-
         {/* Doctors */}
         <div ref={sectionRefs.current.docs} data-section-id="docs">
           <section style={cardOuterStyle}>
@@ -1973,18 +1948,6 @@ function updatePArray(field, idx, key, value) {
                   </li>
                 ))}
               </ul>
-            </section>
-          )}
-
-          {/* Functional impact */}
-          {isNonEmptyString(functionalImpactForPrint) && (
-            <section className="print-section" style={{ marginBottom: "12pt" }}>
-              <h2 style={{ fontSize: "13pt", marginBottom: "4pt" }}>
-                Functional Impact
-              </h2>
-              <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-                {functionalImpactForPrint}
-              </p>
             </section>
           )}
 
