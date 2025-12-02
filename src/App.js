@@ -202,6 +202,14 @@ export default function App() {
     };
   }, [screen, currentUser, isLocked, showTimeoutWarning]);
 
+  // In minimal mode, never allow navigation to signup/login; go straight to form after intro.
+  useEffect(() => {
+    if (!minimalMode) return;
+    if (screen !== SCREENS.INTRO && screen !== SCREENS.APP) {
+      setScreen(SCREENS.APP);
+    }
+  }, [minimalMode, screen]);
+
   // ----- warning modal (20 seconds before lock) -----
   const timeoutModal =
     minimalMode
