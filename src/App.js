@@ -16,6 +16,13 @@ const SCREENS = {
   APP: "app",
 };
 
+// Test-only mode: activate with ?mode=minimal to skip auth/locks and go intro -> form.
+const isMinimalMode = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("mode") === "minimal";
+};
+
 // REAL MODE: 28-minute inactivity, warn 30 seconds before
 const INACTIVITY_LIMIT_MS = 28 * 60 * 1000; // 28 minutes
 const WARNING_BEFORE_MS = 30 * 1000;        // 30 seconds
@@ -54,8 +61,10 @@ function writeUser(user) {
 }
 
 export default function App() {
+  const [minimalMode] = useState(() => isMinimalMode());
   const [currentUser, setCurrentUser] = useState(null);
   const [screen, setScreen] = useState(() => {
+    if (minimalMode) return SCREENS.INTRO;
     const account = readUser();
     return account ? SCREENS.LOGIN : SCREENS.INTRO;
   });
@@ -146,6 +155,7 @@ export default function App() {
 
   // ----- inactivity / timeout -----
   useEffect(() => {
+    if (minimalMode) return;
     // Only track when on the form, logged in, and not locked
     if (screen !== SCREENS.APP || !currentUser || isLocked) return;
 
@@ -194,7 +204,12 @@ export default function App() {
 
   // ----- warning modal (20 seconds before lock) -----
   const timeoutModal =
-    showTimeoutWarning && screen === SCREENS.APP && currentUser && !isLocked ? (
+    minimalMode
+      ? null
+      : showTimeoutWarning &&
+        screen === SCREENS.APP &&
+        currentUser &&
+        !isLocked ? (
       <div
         style={{
           position: "fixed",
@@ -245,11 +260,13 @@ export default function App() {
           </div>
         </div>
       </div>
-    ) : null;
+        ) : null;
 
   // ----- lock overlay (after inactivity limit) -----
   const lockOverlay =
-    isLocked && readUser() ? (
+    minimalMode
+      ? null
+      : isLocked && readUser() ? (
       <div
         style={{
           position: "fixed",
@@ -364,19 +381,31 @@ export default function App() {
           </div>
         </form>
       </div>
-    ) : null;
+        ) : null;
 
   // ----- screen selection -----
   let content = null;
   switch (screen) {
     case SCREENS.INTRO:
-      content = <IntroScreen onGetStarted={() => setScreen(SCREENS.SIGNUP)} />;
+      content = (
+        <IntroScreen
+          onGetStarted={() =>
+            setScreen(minimalMode ? SCREENS.APP : SCREENS.SIGNUP)
+          }
+        />
+      );
       break;
     case SCREENS.SIGNUP:
-      content = <SignupScreen onSignedUp={handleAccountCreated} />;
+      content = minimalMode ? (
+        <CardLayoutView />
+      ) : (
+        <SignupScreen onSignedUp={handleAccountCreated} />
+      );
       break;
     case SCREENS.LOGIN:
-      content = (
+      content = minimalMode ? (
+        <CardLayoutView />
+      ) : (
         <LoginScreen
           onLoggedIn={handleLoggedIn}
           onGoToCreate={() => setScreen(SCREENS.SIGNUP)}
@@ -386,7 +415,7 @@ export default function App() {
     case SCREENS.APP:
       content = (
         <CardLayoutView
-          onLogout={handleLogout}
+          onLogout={minimalMode ? undefined : handleLogout}
           // CardLayoutView handles patient/visit data itself via local state + localStorage
         />
       );
